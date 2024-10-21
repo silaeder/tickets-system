@@ -1,11 +1,17 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../db/db';
+import { verifyToken } from '../../utils/jwt';
 
 export async function POST(request: Request) {
   const { formId, answers } = await request.json();
-
+  
   if (!formId || !answers) {
     return NextResponse.json({ error: 'Missing form ID or answers' }, { status: 400 });
+  }
+
+  const userId = request.headers.get('X-User-ID');
+  if (!userId) {
+    return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
   }
 
   try {
@@ -17,12 +23,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Form not found' }, { status: 404 });
     }
 
-    await prisma.form.update({
-      where: { id: parseInt(formId) },
+    await prisma.answer.create({
       data: {
-        answers: {
-          push: answers,
-        },
+        formId: parseInt(formId),
+        userId: parseInt(userId),
+        answers,
       },
     });
 

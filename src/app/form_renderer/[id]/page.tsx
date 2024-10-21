@@ -49,59 +49,61 @@ export default function FormRenderer() {
   };
 
   return (
-    <div className='p-2'>
-        <h1 className='text-2xl mb-2'>Форма {name}</h1>
-        <form onSubmit={handleSubmit}>
-        {fields.map((field, index) => (
-            <div key={index} className="mb-4">
-            <label className="block text-lg font-bold">
-                {field.label}
-                {field.required && <span className="text-red-500">*</span>}
-            </label>
-            {field.type === 'text' && (
-                <input
-                type="text"
-                required={field.required}
-                onChange={(e) => handleChange(field.label, e.target.value)}
-                className="border-black border-2 mb-2 rounded-md px-1 outline-none w-full"
-                />
-            )}
-            {field.type === 'textarea' && (
-                <textarea
-                required={field.required}
-                onChange={(e) => handleChange(field.label, e.target.value)}
-                className="border-black border-2 mb-2 rounded-md px-1 outline-none w-full"
-                />
-            )}
-            {field.type === 'checkbox' && (
-                <input
-                type="checkbox"
-                onChange={(e) => handleChange(field.label, e.target.checked)}
-                className="mr-2"
-                />
-            )}
-            {field.type === 'radio' && field.options && (
-                <div>
-                {field.options.map((option, optionIndex) => (
-                    <label key={optionIndex} className="block">
+    <div className='flex flex-col items-center'>
+        <div className='pt-3 container'>
+            <h1 className='text-2xl mb-2'>Форма {name}</h1>
+            <form onSubmit={handleSubmit}>
+            {fields.map((field, index) => (
+                <div key={index} className="mb-4">
+                <label className="block text-lg font-bold">
+                    {field.label}
+                    {field.required && <span className="text-red-500">*</span>}
+                </label>
+                {field.type === 'text' && (
                     <input
-                        type="radio"
-                        name={field.label}
-                        value={option}
-                        onChange={(e) => handleChange(field.label, e.target.value)}
-                        className="mr-2"
+                    type="text"
+                    required={field.required}
+                    onChange={(e) => handleChange(field.label, e.target.value)}
+                    className="border-black border-2 mb-2 rounded-md px-1 outline-none w-full"
                     />
-                    {option}
-                    </label>
-                ))}
+                )}
+                {field.type === 'textarea' && (
+                    <textarea
+                    required={field.required}
+                    onChange={(e) => handleChange(field.label, e.target.value)}
+                    className="border-black border-2 mb-2 rounded-md px-1 outline-none w-full"
+                    />
+                )}
+                {field.type === 'checkbox' && (
+                    <input
+                    type="checkbox"
+                    onChange={(e) => handleChange(field.label, e.target.checked)}
+                    className="mr-2"
+                    />
+                )}
+                {field.type === 'radio' && field.options && (
+                    <div>
+                    {field.options.map((option, optionIndex) => (
+                        <label key={optionIndex} className="block">
+                        <input
+                            type="radio"
+                            name={field.label}
+                            value={option}
+                            onChange={(e) => handleChange(field.label, e.target.value)}
+                            className="mr-2"
+                        />
+                        {option}
+                        </label>
+                    ))}
+                    </div>
+                )}
                 </div>
-            )}
-            </div>
-        ))}
-        <button type="submit" className="bg-blue-200 rounded-md py-2 px-4">
-            Отправить
-        </button>
-        </form>
+            ))}
+            <button type="submit" className="bg-blue-200 rounded-md py-2 px-4">
+                Отправить
+            </button>
+            </form>
+        </div>
     </div>
   );
 }
