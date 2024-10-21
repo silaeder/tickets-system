@@ -22,7 +22,7 @@ model Ticket {
   second_name String
   surname String
 
-  category Category
+  category Category?
 }
 
 model Category {
@@ -36,8 +36,4 @@ model Category {
   social Boolean
   math Boolean
   games Boolean
-}
-
-model Project {
-
 }
