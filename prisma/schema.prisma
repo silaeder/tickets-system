@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+
+  name String
+  second_name String
+  surname String
+}
+
+model Ticket {
+  id Int @id @default(autoincrement())
+
+  name String
+  second_name String
+  surname String
+
+  category Category
+}
+
+model Category {
+  id Int @id @default(autoincrement())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id])
+  ticketId Int @unique
+
+  physics Boolean
+  biology Boolean
+  social Boolean
+  math Boolean
+  games Boolean
+}
+
+model Project {
+
+}
