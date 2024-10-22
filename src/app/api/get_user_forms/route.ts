@@ -8,7 +8,11 @@ export async function GET(request: Request) {
   }
 
   try {
-    const userForms = await prisma.answer.findMany({
+    const allForms = await prisma.form.findMany({
+      select: { id: true, name: true },
+    });
+
+    const userAnswers = await prisma.answer.findMany({
       where: { userId: parseInt(userId) },
       include: {
         form: { select: { name: true } },
@@ -16,7 +20,10 @@ export async function GET(request: Request) {
       },
     });
 
-    return NextResponse.json(userForms);
+    const completedFormIds = new Set(userAnswers.map(answer => answer.formId));
+    const availableForms = allForms.filter(form => !completedFormIds.has(form.id));
+
+    return NextResponse.json({ availableForms, completedForms: userAnswers });
   } catch (error) {
     console.error('Error fetching user forms:', error);
     return NextResponse.json({ error: 'Failed to fetch user forms' }, { status: 500 });

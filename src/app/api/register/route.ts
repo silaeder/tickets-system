@@ -24,6 +24,7 @@ export async function POST(request: Request) {
       name,
       second_name,
       surname,
+      is_admin: false,
     },
   });
 

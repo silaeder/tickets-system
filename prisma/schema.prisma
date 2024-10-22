@@ -17,6 +17,8 @@ model User {
 
   password String
 
+  is_admin Boolean
+
   forms Form[]
   answers Answer[]
 }

@@ -1,11 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
+
+type User = {
+  name: string;
+  is_admin: boolean;
+};
 
 export default function Navbar() {
-  const [user, setUser] = useState<{ name: string } | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -65,19 +70,23 @@ export default function Navbar() {
               Главная
             </Link>
 
-            <Link 
-              href="/form_constructor" 
-              className={`text-white hover:text-blue-200 mb-2 lg:mb-0 ${pathname === '/form_constructor' ? 'underline underline-offset-2 decoration-2' : ''}`}
-            >
-              Конструктор форм
-            </Link>
+            {user && user.is_admin && (
+              <Link 
+                href="/form_constructor" 
+                className={`text-white hover:text-blue-200 mb-2 lg:mb-0 ${pathname === '/form_constructor' ? 'underline underline-offset-2 decoration-2' : ''}`}
+              >
+                Создать форму
+              </Link>
+            )}
 
-            <Link 
-              href="/my_forms" 
-              className={`text-white hover:text-blue-200 mb-2 lg:mb-0 ${pathname === '/my_forms' ? 'underline underline-offset-2 decoration-2' : ''}`}
-            >
-              Мои формы
-            </Link>
+            {user && user.is_admin && (
+              <Link 
+                href="/my_forms" 
+                className={`text-white hover:text-blue-200 mb-2 lg:mb-0 ${pathname === '/my_forms' ? 'underline underline-offset-2 decoration-2' : ''}`}
+              >
+                Мои формы
+              </Link>
+            )}
           </div>
           
           {isMenuOpen ? <>

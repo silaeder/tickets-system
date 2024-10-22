@@ -1,11 +1,40 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Navbar from '../components/navbar';
 
 export default function FormConstructor() {
+  const [isAdmin, setIsAdmin] = useState(false);
   const [formName, setFormName] = useState('');
   const [fields, setFields] = useState<{ type: string; label: string; options: string[]; required: boolean }[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        const response = await fetch('/api/user');
+        if (response.ok) {
+          const userData = await response.json();
+          setIsAdmin(userData.is_admin);
+          if (!userData.is_admin) {
+            router.push('/');
+          }
+        } else {
+          router.push('/login');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        router.push('/login');
+      }
+    };
+
+    checkAdminStatus();
+  }, [router]);
+
+  if (!isAdmin) {
+    return null;
+  }
 
   const addField = (type: string) => {
     if (type === 'radio') {
@@ -67,7 +96,7 @@ export default function FormConstructor() {
 
       <div className='p-2 flex flex-col md:flex-row'>
         <div className='w-full md:w-1/3 md:pr-4 mb-4 md:mb-0'>
-          <h1 className='text-2xl mb-2'>Конструктор формы</h1>
+          <h1 className='text-2xl mb-2 font-bold'>Конструктор формы</h1>
           <input
             type="text"
             placeholder="Название формы"
