@@ -103,7 +103,7 @@ export default function FormRenderer() {
                   )}
                   </div>
               ))}
-              <button type="submit" className="bg-blue-200 rounded-md py-2 px-4">
+              <button type="submit" className="bg-blue-200 hover:bg-blue-300 rounded-md py-2 px-4 transition-all ease-in-out duration-300">
                   Отправить
               </button>
               </form>

@@ -71,6 +71,13 @@ export default function Navbar() {
             >
               Конструктор форм
             </Link>
+
+            <Link 
+              href="/my_forms" 
+              className={`text-white hover:text-blue-200 mb-2 lg:mb-0 ${pathname === '/my_forms' ? 'underline underline-offset-2 decoration-2' : ''}`}
+            >
+              Мои формы
+            </Link>
           </div>
           
           {isMenuOpen ? <>

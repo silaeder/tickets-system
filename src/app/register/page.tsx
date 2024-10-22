@@ -65,8 +65,8 @@ export default function Register() {
           value={surname}
           onChange={(e) => setSurname(e.target.value)}
         />
-        <a href='/login' className=' text-blue-700 mb-2 hover:text-blue-900'>Войти</a>
-        <button className="bg-blue-200 rounded-md py-2" type="submit">
+        <a href='/login' className=' text-blue-500 hover:underline mb-2'>Войти</a>
+        <button className="bg-blue-200 hover:bg-blue-300 rounded-md py-2 transition-all ease-in-out duration-300" type="submit">
           Зарегистрироваться
         </button>
       </form>

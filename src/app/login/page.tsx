@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -41,8 +42,8 @@ export default function Login() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
-                <a href='/register' className=' text-blue-700 mb-2 hover:text-blue-900'>Зарегистрироваться</a>
-                <button className="bg-blue-200 rounded-md py-2" type="submit">
+                <Link href='/register' className=' text-blue-500 hover:underline mb-2'>Зарегистрироваться</Link>
+                <button className="bg-blue-200 hover:bg-blue-300 rounded-md py-2 transition-all ease-in-out duration-300" type="submit">
                     Войти
                 </button>
             </form>
