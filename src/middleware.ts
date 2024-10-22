@@ -15,7 +15,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // Add the user ID to the request headers
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('X-User-ID', decoded.userId);
 

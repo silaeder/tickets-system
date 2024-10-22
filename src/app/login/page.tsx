@@ -28,14 +28,14 @@ export default function Login() {
             <form className="flex flex-col" onSubmit={handleSubmit}>
                 <h1 className="text-4xl text-center mb-2">Вход</h1>
                 <input
-                    className="border-black border-2 mb-2 rounded-md px-1 outline-none"
+                    className="border-black border-2 mb-2 rounded-md px-2 py-1 outline-none"
                     type="text"
                     placeholder="Эл. почта"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                 />
                 <input
-                    className="border-black border-2 mb-2 px-1 rounded-md outline-none"
+                    className="border-black border-2 mb-2 px-2 py-1 rounded-md outline-none"
                     type="password"
                     placeholder="Пароль"
                     value={password}

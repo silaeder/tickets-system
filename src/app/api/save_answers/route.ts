@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../db/db';
-import { verifyToken } from '../../utils/jwt';
 
 export async function POST(request: Request) {
   const { formId, answers } = await request.json();
@@ -28,10 +27,22 @@ export async function POST(request: Request) {
         formId: parseInt(formId),
         userId: parseInt(userId),
         answers,
+        status: {
+          create: {
+            approved: false,
+            waiting: true,
+            edits_required: false,
+          },
+        },
+      },
+      include: {
+        status: true,
       },
     });
 
-    return NextResponse.json({ message: 'Answers saved successfully' });
+    return NextResponse.json({ 
+      message: 'Answers saved successfully'
+    });
   } catch (error) {
     console.error('Error saving answers:', error);
     return NextResponse.json({ error: 'Failed to save answers' }, { status: 500 });

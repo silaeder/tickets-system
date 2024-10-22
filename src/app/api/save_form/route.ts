@@ -18,7 +18,7 @@ export async function POST(request: Request) {
         data: {
           name,
           form_description: fields,
-          userId: parseInt(userId) // Use userId directly
+          userId: parseInt(userId)
         },
     });
 
