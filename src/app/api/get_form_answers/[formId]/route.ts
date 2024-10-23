@@ -1,72 +1,119 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../../db/db';
 
+interface Comment {
+  sender: string;
+  text: string;
+  timestamp: string;
+  replies: Comment[];
+}
+
 export async function GET(request: Request, { params }: { params: { formId: string } }) {
-    const { formId } = params;
-    const userId = request.headers.get('X-User-ID');
+  const { formId } = params;
+  const userId = request.headers.get('X-User-ID');
 
-    if (!userId) {
+  if (!userId) {
     return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
-    }
+  }
 
-    try {
-    // Check if the user is the creator of the form
+  try {
     const form = await prisma.form.findUnique({
-        where: { id: parseInt(formId) },
-        select: { userId: true },
+      where: { id: parseInt(formId) },
+      select: { userId: true },
     });
 
     if (!form || form.userId !== parseInt(userId)) {
-        return NextResponse.json({ error: 'Unauthorized access' }, { status: 403 });
+      return NextResponse.json({ error: 'Unauthorized access' }, { status: 403 });
     }
 
-    // Fetch answers for the form
     const answers = await prisma.answer.findMany({
-        where: { formId: parseInt(formId) },
-        include: {
+      where: { formId: parseInt(formId) },
+      include: {
         user: {
-            select: { name: true, surname: true },
+          select: { name: true, surname: true },
         },
         status: true,
-        },
+      },
     });
 
     return NextResponse.json(answers);
-    } catch (error) {
+  } catch (error) {
     console.error('Error fetching form answers:', error);
     return NextResponse.json({ error: 'Failed to fetch form answers' }, { status: 500 });
-    }
+  }
 }
 
 export async function PATCH(request: Request, { params }: { params: { formId: string } }) {
-    const { formId } = params;
-    const userId = request.headers.get('X-User-ID');
-    const { answerId, status } = await request.json();
+  const { formId } = params;
+  const userId = request.headers.get('X-User-ID');
+  const { answerId, status, comment, replyTo } = await request.json();
 
-    if (!userId) {
-        return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
+  if (!userId) {
+    return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
+  }
+
+  try {
+    const form = await prisma.form.findUnique({
+      where: { id: parseInt(formId) },
+      select: { userId: true },
+    });
+
+    if (!form || form.userId !== parseInt(userId)) {
+      return NextResponse.json({ error: 'Unauthorized access' }, { status: 403 });
     }
 
-    try {
-        // Check if the user is the creator of the form
-        const form = await prisma.form.findUnique({
-        where: { id: parseInt(formId) },
-        select: { userId: true },
-        });
+    const user = await prisma.user.findUnique({
+      where: { id: parseInt(userId) },
+      select: { name: true, surname: true },
+    });
 
-        if (!form || form.userId !== parseInt(userId)) {
-        return NextResponse.json({ error: 'Unauthorized access' }, { status: 403 });
+    const currentStatus = await prisma.status.findUnique({
+      where: { answerId: parseInt(answerId) },
+      select: { comments: true },
+    });
+    
+    let updatedComments: Comment[] = [];
+    if (Array.isArray(currentStatus?.comments)) {
+      updatedComments = (currentStatus.comments as any[]).map(comment => ({
+        sender: comment.sender,
+        text: comment.text,
+        timestamp: comment.timestamp,
+        replies: comment.replies || []
+      }));
+    }
+
+    const newComment: Comment = {
+      sender: `${user?.name} ${user?.surname}`,
+      text: comment,
+      timestamp: new Date().toISOString(),
+      replies: [],
+    };
+
+    if (replyTo) {
+      const addReplyToComment = (comments: Comment[], indices: number[]) => {
+        if (indices.length === 1) {
+          comments[indices[0]].replies.push(newComment);
+        } else {
+          addReplyToComment(comments[indices[0]].replies, indices.slice(1));
         }
+      };
 
-        // Update the status
-        await prisma.status.update({
-        where: { answerId: parseInt(answerId) },
-        data: status,
-        });
-
-        return NextResponse.json({ message: 'Status updated successfully' });
-    } catch (error) {
-        console.error('Error updating answer status:', error);
-        return NextResponse.json({ error: 'Failed to update answer status' }, { status: 500 });
+      addReplyToComment(updatedComments, replyTo.indices);
+    } else {
+      updatedComments.push(newComment);
     }
+
+    await prisma.status.update({
+      where: { answerId: parseInt(answerId) },
+      data: {
+        ...status,
+        comments: updatedComments,
+      },
+    });
+
+    return NextResponse.json({ message: 'Status and comments updated successfully' });
+  } catch (error) {
+    console.error('Error updating status and comments:', error);
+    return NextResponse.json({ error: 'Failed to update status and comments' }, { status: 500 });
+  }
 }

@@ -46,6 +46,8 @@ model Status {
   approved Boolean
   waiting Boolean
   edits_required Boolean
+
+  comments Json?
 }
 
 model Form {

@@ -31,25 +31,29 @@ export default function MyForms() {
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-100">
       <Navbar />
-      <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Мои формы</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {forms.map((form) => (
-            <div key={form.id} className="border rounded-lg p-4 shadow-md">
-                <h2 className="text-xl font-semibold mb-2">{form.name}</h2>
-                <div className="flex flex-col space-y-2">
-                <Link href={`/form_renderer/${form.id}`} className="text-blue-500 hover:underline">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-8 text-gray-800">Мои формы</h1>
+        {forms.length === 0 ? (
+          <p className="text-xl text-gray-600">У вас пока нет созданных форм.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {forms.map((form) => (
+              <div key={form.id} className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <h2 className="text-2xl font-semibold mb-4 text-gray-800">{form.name}</h2>
+                <div className="flex flex-col space-y-3">
+                  <Link href={`/form_renderer/${form.id}`} className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-300">
                     Ссылка на прохождение
-                </Link>
-                <Link href={`/show_answers/${form.id}`} className="text-green-500 hover:underline">
+                  </Link>
+                  <Link href={`/show_answers/${form.id}`} className="text-green-600 hover:text-green-800 font-medium transition-colors duration-300">
                     Просмотреть ответы
-                </Link>
+                  </Link>
                 </div>
-            </div>
-          ))}
-        </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
