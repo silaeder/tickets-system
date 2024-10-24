@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Navbar from './components/navbar';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type Form = {
   id: number;
@@ -35,6 +36,7 @@ export default function Home() {
   const [selectedFormId, setSelectedFormId] = useState<number | null>(null);
   const [replyText, setReplyText] = useState<string>('');
   const [replyTo, setReplyTo] = useState<number[] | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     fetchForms();
@@ -47,12 +49,15 @@ export default function Home() {
         const data = await response.json();
         setAvailableForms(data.availableForms);
         setCompletedForms(data.completedForms);
+        setLoading(false);
         return data.completedForms;
       } else {
         console.error('Failed to fetch forms');
+        setLoading(false);
       }
     } catch (error) {
       console.error('Error fetching forms:', error);
+      setLoading(false);
     }
   };
 
@@ -64,10 +69,10 @@ export default function Home() {
   };
 
   const getStatusColor = (status: CompletedForm['status']) => {
-    if (status.approved) return 'bg-green-200';
-    if (status.waiting) return 'bg-yellow-200';
-    if (status.edits_required) return 'bg-orange-200';
-    return 'bg-red-200';
+    if (status.approved) return 'bg-green-200 text-green-800';
+    if (status.waiting) return 'bg-yellow-200 text-yellow-800';
+    if (status.edits_required) return 'bg-orange-200 text-orange-800';
+    return 'bg-red-200 text-red-800';
   };
 
   const handleReply = async () => {
@@ -102,114 +107,192 @@ export default function Home() {
       const isReplying = JSON.stringify(currentIndices) === JSON.stringify(replyTo);
       
       return (
-        <div key={index} className={`mb-4 p-3 rounded-lg ${isReplying ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'}`}>
+        <motion.div
+          key={index}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 20 }}
+          transition={{ duration: 0.3 }}
+          className={`mb-4 p-4 rounded-lg transition-all duration-300 ease-in-out ${isReplying ? 'bg-blue-100 border-l-4 border-blue-500' : 'bg-white shadow-lg hover:shadow-xl border border-gray-200'}`}
+        >
           <p className="font-semibold text-gray-800">{comment.sender}</p>
-          <p className="mt-1 text-gray-700">{comment.text}</p>
-          <div className="flex items-center mt-2">
+          <p className="mt-2 text-gray-700">{comment.text}</p>
+          <div className="flex items-center mt-3">
             <p className="text-sm text-gray-500">{new Date(comment.timestamp).toLocaleString()}</p>
-            <button
-              className="ml-4 text-blue-600 hover:text-blue-800 text-sm font-medium"
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`ml-4 px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 ease-in-out ${isReplying ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
               onClick={() => setReplyTo(currentIndices)}
             >
               {isReplying ? 'Отвечаете' : 'Ответить'}
-            </button>
+            </motion.button>
           </div>
           {comment.replies && comment.replies.length > 0 && (
-            <div className="ml-4 mt-3 border-l-2 border-gray-200 pl-3">
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="ml-6 mt-4 border-l-2 border-gray-300 pl-4"
+            >
               {renderComments(comment.replies, currentIndices)}
-            </div>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
       );
     });
   };
 
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex justify-center items-center"
+      >
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+          className="rounded-full h-24 w-24 border-t-2 border-b-2 border-blue-500"
+        />
+      </motion.div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-100">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200"
+    >
       <Navbar />
 
-      <main className="container mx-auto px-4 py-8">
-        <section className="mb-12">
-          <h1 className="text-3xl font-bold mb-6 text-gray-800">Доступные формы</h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {availableForms.map((form) => (
-              <div key={form.id} className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
-                <h2 className="text-xl font-semibold mb-3 text-gray-800">{form.name}</h2>
-                <Link href={`/form_renderer/${form.id}`} className="text-blue-600 hover:text-blue-800 font-medium">
-                  Заполнить форму
-                </Link>
+      <main className="container mx-auto px-4 py-6">
+        <AnimatePresence>
+          {availableForms.length > 0 && (
+            <motion.section
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.3 }}
+              className="mb-16"
+            >
+              <h1 className="text-4xl font-bold mb-8 text-gray-800 text-center">Доступные формы</h1>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {availableForms.map((form) => (
+                  <motion.div
+                    key={form.id}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-all duration-200 ease-in-out transform hover:-translate-y-1"
+                  >
+                    <h2 className="text-2xl font-semibold mb-4 text-gray-800">{form.name}</h2>
+                    <Link href={`/form_renderer/${form.id}`} className="inline-block bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition-all duration-200 ease-in-out text-center w-full">
+                      Заполнить форму
+                    </Link>
+                  </motion.div>
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
+            </motion.section>
+          )}
 
-        <section>
-          <h1 className="text-3xl font-bold mb-6 text-gray-800">Отправленные формы</h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {completedForms.map((form) => (
-              <div key={form.id} className="bg-white rounded-lg p-6 shadow-md">
-                <h2 className="text-xl font-semibold mb-3 text-gray-800">{form.form.name}</h2>
-                <div className={`${getStatusColor(form.status)} px-3 py-1 rounded-full inline-block text-sm font-medium mr-3`}>
-                  {getStatusText(form.status)}
-                </div>
-                {form.status.comments && form.status.comments.length > 0 && (
+          {completedForms.length > 0 && (
+            <motion.section
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              <h1 className="text-4xl font-bold mb-8 text-gray-800 text-center">Отправленные формы</h1>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {completedForms.map((form) => (
+                  <motion.div
+                    key={form.id}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-all duration-200 ease-in-out"
+                  >
+                    <h2 className="text-2xl font-semibold mb-4 text-gray-800">{form.form.name}</h2>
+                    <div className={`${getStatusColor(form.status)} px-4 py-2 rounded-full inline-block text-sm font-medium mb-4 transition-all duration-200 ease-in-out`}>
+                      {getStatusText(form.status)}
+                    </div>
+                    <div className="flex flex-col space-y-3">
+                      {form.status.comments && form.status.comments.length > 0 && (
+                        <motion.button
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
+                          className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-full transition-all duration-200 ease-in-out"
+                          onClick={() => {
+                            setSelectedFormComments(form.status.comments);
+                            setSelectedFormId(form.id);
+                          }}
+                        >
+                          Комментарии ({form.status.comments.length})
+                        </motion.button>
+                      )}
+                      <Link 
+                        href={`/form_renderer/${form.formId}`}
+                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-full text-center transition-all duration-200 ease-in-out"
+                      >
+                        Отправить снова
+                      </Link>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {selectedFormComments && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg max-w-3xl w-full max-h-[80vh] flex flex-col shadow-2xl">
+                <div className="p-6 border-b sticky top-0 bg-white z-10 flex justify-between rounded-t-lg items-center">
+                  <h3 className="text-2xl font-semibold text-gray-800">Комментарии</h3>
                   <button
-                    className="mt-2 text-blue-600 hover:text-blue-800 font-medium"
+                    className="text-gray-500 hover:text-gray-700 transition-colors duration-200 ease-in-out"
                     onClick={() => {
-                      setSelectedFormComments(form.status.comments);
-                      setSelectedFormId(form.id);
+                      setSelectedFormComments(null);
+                      setSelectedFormId(null);
+                      setReplyTo(null);
+                      setReplyText('');
                     }}
                   >
-                    Комментарии
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {selectedFormComments && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg max-w-3xl w-full max-h-[80vh] flex flex-col shadow-xl">
-              <div className="p-4 border-b sticky top-0 bg-white z-10 flex justify-between rounded-t-lg items-center">
-                <h3 className="text-xl font-semibold text-gray-800">Комментарии</h3>
-                <button
-                  className="text-gray-500 hover:text-gray-700"
-                  onClick={() => {
-                    setSelectedFormComments(null);
-                    setSelectedFormId(null);
-                    setReplyTo(null);
-                    setReplyText('');
-                  }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              
-              <div className="p-4 overflow-y-auto flex-grow">
-                {renderComments(selectedFormComments)}
-              </div>
-              
-              {replyTo && (
-                <div className="sticky bottom-0 bg-white p-4 border-t rounded-b-lg">
-                  <div className="flex items-center">
-                    <input
-                      type="text"
-                      className="flex-grow p-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-                      placeholder="Напишите ответ..."
-                      value={replyText}
-                      onChange={(e) => setReplyText(e.target.value)}
-                    />
+                </div>
+                
+                <div className="p-6 overflow-y-auto flex-grow">
+                  <AnimatePresence initial={false}>
+                    {renderComments(selectedFormComments)}
+                  </AnimatePresence>
+                </div>
+                
+                {replyTo && (
+                  <div className="sticky bg-white w-full bottom-0 p-6 border-t rounded-b-lg shadow-lg">
+                    <div className="flex items-center">
+                      <input
+                        type="text"
+                        className="flex-grow p-3 border rounded-l-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ease-in-out"
+                        placeholder="Напишите ответ..."
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                      />
+                      <button
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-r-full transition-all duration-200 ease-in-out"
+                        onClick={handleReply}
+                      >
+                        Отправить
+                      </button>
+                    </div>
                     <button
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-r transition-colors duration-300"
-                      onClick={handleReply}
-                    >
-                      Отправить
-                    </button>
-                    <button
-                      className="ml-2 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded transition-colors duration-300"
+                      className="mt-3 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-full transition-all duration-200 ease-in-out"
                       onClick={() => {
                         setReplyTo(null);
                         setReplyText('');
@@ -218,12 +301,12 @@ export default function Home() {
                       Отмена
                     </button>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </AnimatePresence>
       </main>
-    </div>
+    </motion.div>
   );
 }

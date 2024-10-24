@@ -1,25 +1,21 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiMenu, FiX, FiHome, FiFileText, FiLogOut, FiUser } from 'react-icons/fi';
 import { useRouter, usePathname } from 'next/navigation';
 
-type User = {
-  name: string;
-  is_admin: boolean;
-};
-
 export default function Navbar() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<{ name: string; is_admin: boolean } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    fetchUserData();
+    fetchUser();
   }, []);
 
-  const fetchUserData = async () => {
+  const fetchUser = async () => {
     try {
       const response = await fetch('/api/user');
       if (response.ok) {
@@ -27,7 +23,9 @@ export default function Navbar() {
         setUser(userData);
       }
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      console.error('Error fetching user:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -35,7 +33,6 @@ export default function Navbar() {
     try {
       const response = await fetch('/api/logout', { method: 'POST' });
       if (response.ok) {
-        setUser(null);
         router.push('/login');
       }
     } catch (error) {
@@ -43,98 +40,167 @@ export default function Navbar() {
     }
   };
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
   return (
-    <nav className="bg-gradient-to-r from-blue-800 to-blue-600 shadow-lg">
-      <div className="container mx-auto flex flex-wrap justify-between items-center py-4 px-6">
-        <Link href="/" className="text-white text-2xl font-bold hover:text-blue-200 transition-colors duration-300">
-          Tickets System
-        </Link>
-
-        <button
-          className="lg:hidden text-white hover:text-blue-200 transition-colors duration-300"
-          onClick={toggleMenu}
-          aria-label="Toggle menu"
-        >
-          {isMenuOpen ? '✕' : '☰'}
-        </button>
-
-        <div className={`w-full lg:w-auto ${isMenuOpen ? 'block' : 'hidden'} lg:flex lg:items-center lg:justify-center mt-4 lg:mt-0 lg:flex-grow`}>
-          <div className='flex flex-col lg:flex-row lg:gap-6'>
-            <Link 
-              href="/" 
-              className={`text-white hover:text-blue-200 mb-2 lg:mb-0 transition-colors duration-300 ${pathname === '/' ? 'font-semibold border-b-2 border-white' : ''}`}
+    <nav className="bg-white/70 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex items-center">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              Главная
-            </Link>
-
-            {user && user.is_admin && (
               <Link 
-                href="/form_constructor" 
-                className={`text-white hover:text-blue-200 mb-2 lg:mb-0 transition-colors duration-300 ${pathname === '/form_constructor' ? 'font-semibold border-b-2 border-white' : ''}`}
+                href="/" 
+                className="flex items-center space-x-2 text-xl font-semibold text-gray-800 transition-colors"
               >
-                Создать форму
-              </Link>
-            )}
-
-            {user && user.is_admin && (
-              <Link 
-                href="/my_forms" 
-                className={`text-white hover:text-blue-200 mb-2 lg:mb-0 transition-colors duration-300 ${pathname === '/my_forms' ? 'font-semibold border-b-2 border-white' : ''}`}
-              >
-                Мои формы
-              </Link>
-            )}
-          </div>
-          
-          {isMenuOpen ? <>
-            <div className="mt-4 lg:mt-0">
-              {user ? (
-                <>
-                  <span className="text-white mr-4 block lg:inline mb-2 lg:mb-0">Привет, {user.name}</span>
-                  <button
-                    onClick={handleLogout}
-                    className="bg-white text-blue-600 px-4 py-2 rounded-full hover:bg-blue-100 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 w-full lg:w-auto"
-                  >
-                    Выйти
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => {router.push("/login")}}
-                  className="bg-white text-blue-600 px-4 py-2 rounded-full hover:bg-blue-100 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 w-full lg:w-auto"
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="bg-gradient-to-r from-blue-500 to-indigo-500 p-2 rounded-lg"
                 >
-                  Войти
-                </button>
-              )}
-            </div>
-          </> : <></>}
-        </div>
+                  <FiHome className="h-5 w-5 text-white" />
+                </motion.div>
+                <span>TicketSystem</span>
+              </Link>
+            </motion.div>
+          </div>
 
-        <div className="hidden lg:block mt-4 lg:mt-0">
-          {user ? (
+          {!isLoading && (
             <>
-              <span className="text-white mr-4 inline">Привет, {user.name}</span>
-              <button
-                onClick={handleLogout}
-                className="bg-white text-blue-600 px-4 py-2 rounded-full hover:bg-blue-100 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
-              >
-                Выйти
-              </button>
+              <div className="hidden sm:flex sm:items-center sm:space-x-4">
+                <NavLink href="/" isActive={pathname === '/'}>
+                  <FiHome className="h-4 w-4 mr-2" />
+                  Главная
+                </NavLink>
+
+                <NavLink href="/my_forms" isActive={pathname === '/my_forms'}>
+                  <FiFileText className="h-4 w-4 mr-2" />
+                  Мои формы
+                </NavLink>
+
+                {user?.is_admin && (
+                  <NavLink href="/form_constructor" isActive={pathname === '/form_constructor'}>
+                    <FiFileText className="h-4 w-4 mr-2" />
+                    Создать форму
+                  </NavLink>
+                )}
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleLogout}
+                  className="flex items-center px-4 py-2 rounded-full text-sm font-medium text-white bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200"
+                >
+                  <FiLogOut className="h-4 w-4 mr-2" />
+                  Выйти
+                </motion.button>
+              </div>
+
+              <div className="flex items-center sm:hidden">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setIsOpen(!isOpen)}
+                  className="inline-flex items-center justify-center p-2 rounded-lg text-gray-500 hover:text-gray-600 hover:bg-gray-100/50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 backdrop-blur-lg"
+                >
+                  {isOpen ? <FiX className="h-6 w-6" /> : <FiMenu className="h-6 w-6" />}
+                </motion.button>
+              </div>
             </>
-          ) : (
-            <button
-              onClick={() => {router.push("/login")}}
-              className="bg-white text-blue-600 px-4 py-2 rounded-full hover:bg-blue-100 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
-            >
-              Войти
-            </button>
           )}
         </div>
       </div>
+
+      <AnimatePresence>
+        {isOpen && !isLoading && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="sm:hidden bg-white/70 backdrop-blur-lg"
+          >
+            <div className="px-4 pt-2 pb-3 space-y-1">
+              <MobileNavLink href="/" icon={<FiHome />} isActive={pathname === '/'}>
+                Главная
+              </MobileNavLink>
+              <MobileNavLink href="/my_forms" icon={<FiFileText />} isActive={pathname === '/my_forms'}>
+                Мои формы
+              </MobileNavLink>
+              {user?.is_admin && (
+                <MobileNavLink 
+                  href="/form_constructor" 
+                  icon={<FiFileText />} 
+                  isActive={pathname === '/form_constructor'}
+                >
+                  Создать форму
+                </MobileNavLink>
+              )}
+              <MobileNavLink href="#" icon={<FiLogOut />} onClick={handleLogout}>
+                Выйти
+              </MobileNavLink>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }
+
+const NavLink = ({ 
+  href, 
+  children, 
+  isActive 
+}: { 
+  href: string; 
+  children: React.ReactNode;
+  isActive: boolean;
+}) => (
+  <motion.div
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+  >
+    <Link href={href} className="relative">
+      <div
+        className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+          isActive 
+            ? 'text-white bg-gradient-to-r from-blue-500 to-indigo-500' 
+            : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100/50'
+        }`}
+      >
+        {children}
+      </div>
+    </Link>
+  </motion.div>
+);
+
+const MobileNavLink = ({ 
+  href, 
+  children, 
+  icon,
+  onClick,
+  isActive
+}: { 
+  href: string; 
+  children: React.ReactNode; 
+  icon: React.ReactNode;
+  onClick?: () => void;
+  isActive?: boolean;
+}) => (
+  <motion.div
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+  >
+    <Link
+      href={href}
+      onClick={onClick}
+      className={`flex items-center px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
+        isActive 
+          ? 'text-white bg-gradient-to-r from-blue-500 to-indigo-500' 
+          : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100/50'
+      }`}
+    >
+      <span className="mr-3">{icon}</span>
+      {children}
+    </Link>
+  </motion.div>
+);

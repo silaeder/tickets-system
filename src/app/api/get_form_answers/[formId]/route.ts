@@ -33,6 +33,9 @@ export async function GET(request: Request, { params }: { params: { formId: stri
           select: { name: true, surname: true },
         },
         status: true,
+        form: {
+          select: { form_description: true }
+        }
       },
     });
 

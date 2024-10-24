@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Navbar from '../../components/navbar';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type Answer = {
   id: number;
@@ -11,6 +12,15 @@ type Answer = {
     surname: string;
   };
   answers: Record<string, any>;
+  form: {
+    form_description: {
+      id: string;
+      label: string;
+      type: string;
+      required: boolean;
+      options?: string[];
+    }[];
+  };
   status: {
     approved: boolean;
     waiting: boolean;
@@ -93,104 +103,177 @@ export default function ShowAnswers() {
   };
 
   const getStatusColor = (status: Answer['status']) => {
-    if (status.approved) return 'bg-green-200';
-    if (status.waiting) return 'bg-yellow-200';
-    if (status.edits_required) return 'bg-orange-200';
-    return 'bg-red-200';
+    if (status.approved) return 'bg-green-200 text-green-800';
+    if (status.waiting) return 'bg-yellow-200 text-yellow-800';
+    if (status.edits_required) return 'bg-orange-200 text-orange-800';
+    return 'bg-red-200 text-red-800';
   };
 
   const renderComments = (comments: Comment[] | null, answerId: number, indices: number[] = []) => {
     if (!comments) return null;
-    return comments.map((comment, index) => (
-      <div key={index} className={`ml-4 mt-2 p-2 rounded-lg ${replyTo && replyTo.answerId === answerId && JSON.stringify(replyTo.indices) === JSON.stringify([...indices, index]) ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'}`}>
-        <p><strong className="text-blue-600">{comment.sender}:</strong> {comment.text}</p>
-        <p className="text-xs text-gray-500 mt-1">{new Date(comment.timestamp).toLocaleString()}</p>
-        <button
-          className="text-blue-500 hover:text-blue-700 text-sm mr-2 mt-1 transition-colors duration-200"
-          onClick={() => setReplyTo({ answerId, indices: [...indices, index] })}
+    return comments.map((comment, index) => {
+      const currentIndices = [...indices, index];
+      const isReplying = JSON.stringify(currentIndices) === JSON.stringify(replyTo?.indices) && answerId === replyTo?.answerId;
+      
+      return (
+        <motion.div
+          key={index}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 20 }}
+          transition={{ duration: 0.3 }}
+          className={`mb-4 p-4 rounded-lg transition-all duration-300 ease-in-out ${isReplying ? 'bg-blue-100 border-l-4 border-blue-500' : 'bg-white shadow-lg hover:shadow-xl border border-gray-200'}`}
         >
-          Ответить
-        </button>
-        {replyTo && replyTo.answerId === answerId && JSON.stringify(replyTo.indices) === JSON.stringify([...indices, index]) && (
-          <button
-            className="text-red-500 hover:text-red-700 text-sm transition-colors duration-200"
-            onClick={() => setReplyTo(null)}
-          >
-            Отменить ответ
-          </button>
-        )}
-        {comment.replies && comment.replies.length > 0 && (
-          <div className="ml-4 mt-2">
-            {renderComments(comment.replies, answerId, [...indices, index])}
+          <p className="font-semibold text-gray-800">{comment.sender}</p>
+          <p className="mt-2 text-gray-700">{comment.text}</p>
+          <div className="flex items-center mt-3">
+            <p className="text-sm text-gray-500">{new Date(comment.timestamp).toLocaleString()}</p>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`ml-4 px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 ease-in-out ${isReplying ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+              onClick={() => setReplyTo(isReplying ? null : { answerId, indices: currentIndices })}
+            >
+              {isReplying ? 'Отменить ответ' : 'Ответить'}
+            </motion.button>
           </div>
-        )}
-      </div>
-    ));
+          {comment.replies && comment.replies.length > 0 && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="ml-6 mt-4 border-l-2 border-gray-300 pl-4"
+            >
+              {renderComments(comment.replies, answerId, currentIndices)}
+            </motion.div>
+          )}
+        </motion.div>
+      );
+    });
   };
 
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar />
-      <div className="container mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6 text-gray-800">Ответы на форму</h1>
-        {error && <p className="text-red-500 mb-4 p-3 bg-red-100 rounded">{error}</p>}
-        {answers.map((answer) => (
-          <div key={answer.id} className="bg-white rounded-lg p-6 shadow-lg mb-6 transition-all duration-300 hover:shadow-xl">
-            <h2 className="text-2xl font-semibold mb-3 text-gray-800">
-              {answer.user.name} {answer.user.surname}
-            </h2>
-            <div className={`${getStatusColor(answer.status)} px-3 py-1 rounded-full inline-block mb-3 text-sm font-medium`}>
-              {getStatusText(answer.status)}
-            </div>
-            <div className="mb-2">
-              <textarea
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                placeholder={replyTo ? "Отвечаете на комментарий..." : "Оставить комментарий..."}
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                rows={3}
-              />
-            </div>
-            <div className="mb-4 space-x-2">
-              <button
-                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition-all duration-200 ease-in-out"
-                onClick={() => updateStatus(answer.id, { approved: true, waiting: false, edits_required: false }, comment)}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="container mx-auto p-6"
+      >
+        <h1 className="text-4xl font-bold mb-8 text-gray-800">Ответы на форму</h1>
+        {error && (
+          <motion.p
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+            className="text-red-500 mb-6 p-4 bg-red-100 rounded-lg shadow"
+          >
+            {error}
+          </motion.p>
+        )}
+        <AnimatePresence>
+          {answers.map((answer) => (
+            <motion.div
+              key={answer.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="bg-white rounded-lg p-6 shadow-lg mb-8 hover:shadow-xl"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-semibold text-gray-800">
+                  {answer.user.name} {answer.user.surname}
+                </h2>
+                <motion.span
+                  initial={{ scale: 0.9 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.1 }}
+                  className={`${getStatusColor(answer.status)} px-4 py-2 rounded-full text-sm font-medium`}
+                >
+                  {getStatusText(answer.status)}
+                </motion.span>
+              </div>
+              <div className="mb-4">
+                <textarea
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+                  placeholder={replyTo && replyTo.answerId === answer.id ? "Отвечаете на комментарий..." : "Оставить комментарий..."}
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  rows={3}
+                />
+              </div>
+              <div className="mb-6 flex flex-wrap gap-5">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.1 }}
+                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow"
+                  onClick={() => updateStatus(answer.id, { approved: true, waiting: false, edits_required: false }, comment)}
+                >
+                  Одобрить
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.1 }}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow"
+                  onClick={() => updateStatus(answer.id, { approved: false, waiting: true, edits_required: false }, comment)}
+                >
+                  Ожидает проверки
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.1 }}
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow"
+                  onClick={() => updateStatus(answer.id, { approved: false, waiting: false, edits_required: true }, comment)}
+                >
+                  Требуются правки
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.1 }}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow"
+                  onClick={() => updateStatus(answer.id, { approved: false, waiting: false, edits_required: false }, comment)}
+                >
+                  Отказать
+                </motion.button>
+              </div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
+                className="bg-gray-50 p-4 rounded-lg shadow-inner"
               >
-                Одобрить
-              </button>
-              <button
-                className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md transition-all duration-200 ease-in-out"
-                onClick={() => updateStatus(answer.id, { approved: false, waiting: true, edits_required: false }, comment)}
+                {Object.entries(answer.answers).map(([fieldId, value]) => {
+                  const field = answer.form.form_description.find(f => f.id === fieldId);
+                  return (
+                    <p key={fieldId} className="mb-2">
+                      <strong className="text-gray-700">{field?.label || fieldId}:</strong>{' '}
+                      <span className="text-gray-600">{value.toString()}</span>
+                    </p>
+                  );
+                })}
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.3 }}
+                className="mt-6"
               >
-                Ожидает проверки
-              </button>
-              <button
-                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md transition-all duration-200 ease-in-out"
-                onClick={() => updateStatus(answer.id, { approved: false, waiting: false, edits_required: true }, comment)}
-              >
-                Требуются правки
-              </button>
-              <button
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition-all duration-200 ease-in-out"
-                onClick={() => updateStatus(answer.id, { approved: false, waiting: false, edits_required: false }, comment)}
-              >
-                Отказать
-              </button>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-md">
-              {Object.entries(answer.answers).map(([key, value]) => (
-                <p key={key} className="mb-2">
-                  <strong className="text-gray-700">{key}:</strong> <span className="text-gray-600">{value.toString()}</span>
-                </p>
-              ))}
-            </div>
-            <div className="mt-6">
-              <h3 className="font-semibold text-lg mb-2 text-gray-800">Комментарии:</h3>
-              {renderComments(answer.status.comments, answer.id)}
-            </div>
-          </div>
-        ))}
-      </div>
+                <h3 className="font-semibold text-xl mb-3 text-gray-800">Комментарии:</h3>
+                <AnimatePresence>
+                  {renderComments(answer.status.comments, answer.id)}
+                </AnimatePresence>
+              </motion.div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 }
