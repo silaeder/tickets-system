@@ -253,7 +253,10 @@ export default function Home() {
               <div className="bg-white rounded-lg max-w-3xl w-full max-h-[80vh] flex flex-col shadow-2xl">
                 <div className="p-6 border-b sticky top-0 bg-white z-10 flex justify-between rounded-t-lg items-center">
                   <h3 className="text-2xl font-semibold text-gray-800">Комментарии</h3>
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.1, rotate: 90 }}
+                    whileTap={{ scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
                     className="text-gray-500 hover:text-gray-700 transition-colors duration-200 ease-in-out"
                     onClick={() => {
                       setSelectedFormComments(null);
@@ -265,7 +268,7 @@ export default function Home() {
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                  </button>
+                  </motion.button>
                 </div>
                 
                 <div className="p-6 overflow-y-auto flex-grow">

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiMenu, FiX, FiHome, FiFileText, FiLogOut, FiUser } from 'react-icons/fi';
+import { FiMenu, FiX, FiHome, FiFileText, FiLogOut, FiPlus } from 'react-icons/fi';
 import { useRouter, usePathname } from 'next/navigation';
 
 export default function Navbar() {
@@ -73,16 +73,18 @@ export default function Navbar() {
                   Главная
                 </NavLink>
 
-                <NavLink href="/my_forms" isActive={pathname === '/my_forms'}>
-                  <FiFileText className="h-4 w-4 mr-2" />
-                  Мои формы
-                </NavLink>
-
                 {user?.is_admin && (
-                  <NavLink href="/form_constructor" isActive={pathname === '/form_constructor'}>
-                    <FiFileText className="h-4 w-4 mr-2" />
-                    Создать форму
-                  </NavLink>
+                  <>
+                    <NavLink href="/my_forms" isActive={pathname === '/my_forms'}>
+                      <FiFileText className="h-4 w-4 mr-2" />
+                      Мои формы
+                    </NavLink>
+
+                    <NavLink href="/form_constructor" isActive={pathname === '/form_constructor'}>
+                      <FiPlus className="h-4 w-4 mr-2" />
+                      Создать форму
+                    </NavLink>
+                  </>
                 )}
 
                 <motion.button
@@ -101,7 +103,7 @@ export default function Navbar() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setIsOpen(!isOpen)}
-                  className="inline-flex items-center justify-center p-2 rounded-lg text-gray-500 hover:text-gray-600 hover:bg-gray-100/50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 backdrop-blur-lg"
+                  className="inline-flex items-center justify-center p-2 rounded-lg text-gray-500 hover:text-gray-600 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 backdrop-blur-lg"
                 >
                   {isOpen ? <FiX className="h-6 w-6" /> : <FiMenu className="h-6 w-6" />}
                 </motion.button>
@@ -123,17 +125,19 @@ export default function Navbar() {
               <MobileNavLink href="/" icon={<FiHome />} isActive={pathname === '/'}>
                 Главная
               </MobileNavLink>
-              <MobileNavLink href="/my_forms" icon={<FiFileText />} isActive={pathname === '/my_forms'}>
-                Мои формы
-              </MobileNavLink>
               {user?.is_admin && (
-                <MobileNavLink 
-                  href="/form_constructor" 
-                  icon={<FiFileText />} 
-                  isActive={pathname === '/form_constructor'}
-                >
-                  Создать форму
-                </MobileNavLink>
+                <>
+                  <MobileNavLink href="/my_forms" icon={<FiFileText />} isActive={pathname === '/my_forms'}>
+                    Мои формы
+                  </MobileNavLink>
+                  <MobileNavLink 
+                    href="/form_constructor" 
+                    icon={<FiPlus />} 
+                    isActive={pathname === '/form_constructor'}
+                  >
+                    Создать форму
+                  </MobileNavLink>
+                </>
               )}
               <MobileNavLink href="#" icon={<FiLogOut />} onClick={handleLogout}>
                 Выйти
@@ -164,7 +168,7 @@ const NavLink = ({
         className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
           isActive 
             ? 'text-white bg-gradient-to-r from-blue-500 to-indigo-500' 
-            : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100/50'
+            : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200'
         }`}
       >
         {children}
@@ -196,7 +200,7 @@ const MobileNavLink = ({
       className={`flex items-center px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
         isActive 
           ? 'text-white bg-gradient-to-r from-blue-500 to-indigo-500' 
-          : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100/50'
+          : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200'
       }`}
     >
       <span className="mr-3">{icon}</span>

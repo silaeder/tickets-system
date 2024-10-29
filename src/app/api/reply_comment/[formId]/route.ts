@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../../db/db';
 
+type Comment = {
+  sender: string;
+  text: string;
+  timestamp: string;
+  replies: Comment[];
+};
+
 export async function POST(request: Request, { params }: { params: { formId: string } }) {
   const { formId } = params;
   const userId = request.headers.get('X-User-ID');
@@ -11,47 +18,68 @@ export async function POST(request: Request, { params }: { params: { formId: str
   }
 
   try {
+    // Get user info
     const user = await prisma.user.findUnique({
       where: { id: parseInt(userId) },
       select: { name: true, surname: true },
     });
 
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Get answer with status
     const answer = await prisma.answer.findFirst({
-      where: { formId: parseInt(formId), userId: parseInt(userId) },
+      where: { id: parseInt(formId) },
       include: { status: true },
     });
 
-    if (!answer) {
-      return NextResponse.json({ error: 'Answer not found' }, { status: 404 });
+    if (!answer || !answer.status) {
+      return NextResponse.json({ error: 'Answer or status not found' }, { status: 404 });
     }
 
-    let updatedComments = answer.status?.comments as any[] || [];
-    const newReply = {
-      sender: `${user?.name} ${user?.surname}`,
+    // Prepare comments array and new reply
+    let updatedComments = (answer.status.comments as Comment[]) || [];
+    const newReply: Comment = {
+      sender: `${user.name} ${user.surname}`,
       text: replyText,
       timestamp: new Date().toISOString(),
       replies: [],
     };
 
-    const addReplyToComment = (comments: any[], indices: number[]) => {
-      let currentComment = comments;
+    // Helper function to add reply to nested comments
+    const addReplyToComment = (comments: Comment[], indices: number[]): boolean => {
+      if (!Array.isArray(comments)) return false;
+      
+      let currentComments = comments;
       for (let i = 0; i < indices.length; i++) {
+        const currentIndex = indices[i];
+        
+        // Check if index is valid
+        if (currentIndex < 0 || currentIndex >= currentComments.length) {
+          return false;
+        }
+
         if (i === indices.length - 1) {
-          if (!currentComment[indices[i]].replies) {
-            currentComment[indices[i]].replies = [];
+          // Add reply to the target comment
+          if (!currentComments[currentIndex].replies) {
+            currentComments[currentIndex].replies = [];
           }
-          currentComment[indices[i]].replies.push(newReply);
+          currentComments[currentIndex].replies.push(newReply);
+          return true;
         } else {
-          if (!currentComment[indices[i]] || !currentComment[indices[i]].replies) {
-            return false; // Invalid path
+          // Move deeper into the reply chain
+          if (!currentComments[currentIndex].replies) {
+            return false;
           }
-          currentComment = currentComment[indices[i]].replies;
+          currentComments = currentComments[currentIndex].replies;
         }
       }
       return true;
     };
 
-    if (replyTo && replyTo.indices) {
+    // Add the reply either to a specific comment or as a new top-level comment
+    if (replyTo && Array.isArray(replyTo.indices)) {
       const success = addReplyToComment(updatedComments, replyTo.indices);
       if (!success) {
         return NextResponse.json({ error: 'Invalid reply path' }, { status: 400 });
@@ -60,14 +88,21 @@ export async function POST(request: Request, { params }: { params: { formId: str
       updatedComments.push(newReply);
     }
 
+    // Update the status with new comments
     await prisma.status.update({
       where: { answerId: answer.id },
       data: { comments: updatedComments },
     });
 
-    return NextResponse.json({ message: 'Reply added successfully' });
+    return NextResponse.json({ 
+      message: 'Reply added successfully',
+      comments: updatedComments 
+    });
   } catch (error) {
     console.error('Error adding reply:', error);
-    return NextResponse.json({ error: 'Failed to add reply' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Failed to add reply',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }
