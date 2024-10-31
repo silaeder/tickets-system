@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../../db/db';
 
+import { sendStatusUpdateEmail } from '../../../utils/email';
+
 interface Comment {
   sender: string;
   text: string;
@@ -46,6 +48,21 @@ export async function GET(request: Request, { params }: { params: { formId: stri
   }
 }
 
+export function isComment(obj: any): obj is Comment {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof obj.sender === 'string' &&
+    typeof obj.text === 'string' &&
+    typeof obj.timestamp === 'string' &&
+    Array.isArray(obj.replies)
+  );
+}
+
+export function isCommentArray(arr: any): arr is Comment[] {
+  return Array.isArray(arr) && arr.every(isComment);
+}
+
 export async function PATCH(request: Request, { params }: { params: { formId: string } }) {
   const { formId } = params;
   const userId = request.headers.get('X-User-ID');
@@ -56,56 +73,73 @@ export async function PATCH(request: Request, { params }: { params: { formId: st
   }
 
   try {
+    // Get form and verify ownership
     const form = await prisma.form.findUnique({
       where: { id: parseInt(formId) },
-      select: { userId: true },
+      select: { userId: true, name: true },
     });
 
     if (!form || form.userId !== parseInt(userId)) {
       return NextResponse.json({ error: 'Unauthorized access' }, { status: 403 });
     }
 
-    const user = await prisma.user.findUnique({
+    // Get user info for comment
+    const adminUser = await prisma.user.findUnique({
       where: { id: parseInt(userId) },
       select: { name: true, surname: true },
     });
 
-    const currentStatus = await prisma.status.findUnique({
-      where: { answerId: parseInt(answerId) },
-      select: { comments: true },
-    });
-    
-    let updatedComments: Comment[] = [];
-    if (Array.isArray(currentStatus?.comments)) {
-      updatedComments = (currentStatus.comments as any[]).map(comment => ({
-        sender: comment.sender,
-        text: comment.text,
-        timestamp: comment.timestamp,
-        replies: comment.replies || []
-      }));
-    }
-
-    const newComment: Comment = {
-      sender: `${user?.name} ${user?.surname}`,
-      text: comment,
-      timestamp: new Date().toISOString(),
-      replies: [],
-    };
-
-    if (replyTo) {
-      const addReplyToComment = (comments: Comment[], indices: number[]) => {
-        if (indices.length === 1) {
-          comments[indices[0]].replies.push(newComment);
-        } else {
-          addReplyToComment(comments[indices[0]].replies, indices.slice(1));
+    // Get answer user's email and current status
+    const answer = await prisma.answer.findUnique({
+      where: { id: parseInt(answerId) },
+      include: {
+        user: {
+          select: { email: true }
+        },
+        status: {
+          select: { comments: true }
         }
-      };
+      }
+    });
 
-      addReplyToComment(updatedComments, replyTo.indices);
-    } else {
-      updatedComments.push(newComment);
+    if (!answer) {
+      return NextResponse.json({ error: 'Answer not found' }, { status: 404 });
     }
 
+    // Prepare updated comments
+    let updatedComments: Comment[] = [];
+
+    if (answer.status?.comments) {
+      const commentsData = answer.status.comments;
+      if (isCommentArray(commentsData)) {
+        updatedComments = [...commentsData];
+      }
+    }
+  
+    if (comment) {
+      const newComment: Comment = {
+        sender: `${adminUser?.name} ${adminUser?.surname}`,
+        text: comment,
+        timestamp: new Date().toISOString(),
+        replies: [],
+      };
+  
+      if (replyTo) {
+        const addReplyToComment = (comments: Comment[], indices: number[]) => {
+          if (indices.length === 1) {
+            comments[indices[0]].replies.push(newComment);
+          } else {
+            addReplyToComment(comments[indices[0]].replies, indices.slice(1));
+          }
+        };
+  
+        addReplyToComment(updatedComments, replyTo.indices);
+      } else {
+        updatedComments.push(newComment);
+      }
+    }
+
+    // Update status
     await prisma.status.update({
       where: { answerId: parseInt(answerId) },
       data: {
@@ -113,6 +147,16 @@ export async function PATCH(request: Request, { params }: { params: { formId: st
         comments: updatedComments,
       },
     });
+
+    // Send email notification if user has email
+    if (answer.user.email && form.name) {
+      await sendStatusUpdateEmail(
+        answer.user.email,
+        form.name,
+        status,
+        comment
+      );
+    }
 
     return NextResponse.json({ message: 'Status and comments updated successfully' });
   } catch (error) {

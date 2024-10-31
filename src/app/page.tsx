@@ -180,7 +180,7 @@ export default function Home() {
               transition={{ duration: 0.3 }}
               className="mb-16"
             >
-              <h1 className="text-4xl font-bold mb-8 text-gray-800 text-center">Доступные формы</h1>
+              <h1 className="text-4xl font-bold mb-8 text-gray-800 text-center">Доступные заявки</h1>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {availableForms.map((form) => (
                   <motion.div
@@ -206,7 +206,7 @@ export default function Home() {
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.3, delay: 0.1 }}
             >
-              <h1 className="text-4xl font-bold mb-8 text-gray-800 text-center">Отправленные формы</h1>
+              <h1 className="text-4xl font-bold mb-8 text-gray-800 text-center">Отправленные заявки</h1>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {completedForms.map((form) => (
                   <motion.div

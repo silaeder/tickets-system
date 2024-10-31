@@ -41,6 +41,8 @@ export default function ShowAnswers() {
   const [error, setError] = useState<string | null>(null);
   const [comment, setComment] = useState<string>('');
   const [replyTo, setReplyTo] = useState<{ answerId: number; indices: number[] } | null>(null);
+  const [updatingAnswerId, setUpdatingAnswerId] = useState<number | null>(null);
+  const [loadingButtonType, setLoadingButtonType] = useState<string | null>(null);
   const params = useParams();
   const formId = params.formId as string;
 
@@ -66,7 +68,9 @@ export default function ShowAnswers() {
     }
   };
 
-  const updateStatus = async (answerId: number, newStatus: Partial<Answer['status']>, newComment: string) => {
+  const updateStatus = async (answerId: number, newStatus: Partial<Answer['status']>, newComment: string, buttonType: string) => {
+    setUpdatingAnswerId(answerId);
+    setLoadingButtonType(buttonType);
     try {
       const response = await fetch(`/api/get_form_answers/${formId}`, {
         method: 'PATCH',
@@ -92,6 +96,9 @@ export default function ShowAnswers() {
     } catch (error) {
       console.error('Error updating status:', error);
       setError('An error occurred while updating status');
+    } finally {
+      setUpdatingAnswerId(null);
+      setLoadingButtonType(null);
     }
   };
 
@@ -133,6 +140,7 @@ export default function ShowAnswers() {
               whileTap={{ scale: 0.95 }}
               className={`ml-4 px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 ease-in-out ${isReplying ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
               onClick={() => setReplyTo(isReplying ? null : { answerId, indices: currentIndices })}
+              disabled={updatingAnswerId !== null}
             >
               {isReplying ? 'Отменить ответ' : 'Ответить'}
             </motion.button>
@@ -203,6 +211,7 @@ export default function ShowAnswers() {
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   rows={3}
+                  disabled={updatingAnswerId !== null}
                 />
               </div>
               <div className="mb-6 flex flex-wrap gap-5">
@@ -210,37 +219,73 @@ export default function ShowAnswers() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.1 }}
-                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow"
-                  onClick={() => updateStatus(answer.id, { approved: true, waiting: false, edits_required: false }, comment)}
+                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow relative"
+                  onClick={() => updateStatus(answer.id, { approved: true, waiting: false, edits_required: false }, comment, 'approve')}
+                  disabled={updatingAnswerId !== null}
                 >
-                  Одобрить
+                  {updatingAnswerId === answer.id && loadingButtonType === 'approve' ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mx-auto"
+                    />
+                  ) : (
+                    'Одобрить'
+                  )}
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.1 }}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow"
-                  onClick={() => updateStatus(answer.id, { approved: false, waiting: true, edits_required: false }, comment)}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow relative"
+                  onClick={() => updateStatus(answer.id, { approved: false, waiting: true, edits_required: false }, comment, 'waiting')}
+                  disabled={updatingAnswerId !== null}
                 >
-                  Ожидает проверки
+                  {updatingAnswerId === answer.id && loadingButtonType === 'waiting' ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mx-auto"
+                    />
+                  ) : (
+                    'Ожидает проверки'
+                  )}
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.1 }}
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow"
-                  onClick={() => updateStatus(answer.id, { approved: false, waiting: false, edits_required: true }, comment)}
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow relative"
+                  onClick={() => updateStatus(answer.id, { approved: false, waiting: false, edits_required: true }, comment, 'edits')}
+                  disabled={updatingAnswerId !== null}
                 >
-                  Требуются правки
+                  {updatingAnswerId === answer.id && loadingButtonType === 'edits' ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mx-auto"
+                    />
+                  ) : (
+                    'Требуются правки'
+                  )}
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.1 }}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow"
-                  onClick={() => updateStatus(answer.id, { approved: false, waiting: false, edits_required: false }, comment)}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow relative"
+                  onClick={() => updateStatus(answer.id, { approved: false, waiting: false, edits_required: false }, comment, 'reject')}
+                  disabled={updatingAnswerId !== null}
                 >
-                  Отказать
+                  {updatingAnswerId === answer.id && loadingButtonType === 'reject' ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mx-auto"
+                    />
+                  ) : (
+                    'Отказать'
+                  )}
                 </motion.button>
               </div>
               <motion.div

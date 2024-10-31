@@ -37,3 +37,45 @@ export const sendResetCode = async (email: string, code: string) => {
     throw new Error('Failed to send email');
   }
 };
+
+export const sendStatusUpdateEmail = async (
+  email: string,
+  formName: string,
+  status: {
+    approved: boolean;
+    waiting: boolean;
+    edits_required: boolean;
+  },
+  comment: string | null
+) => {
+  const getStatusText = (status: any) => {
+    if (status.approved) return 'Одобрено';
+    if (status.waiting) return 'Ожидает проверки';
+    if (status.edits_required) return 'Требуются правки';
+    return 'Отказано';
+  };
+
+  const mailOptions = {
+    from: process.env.SMTP_USER,
+    to: email,
+    subject: `Обновление статуса заявки "${formName}"`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2563eb;">Обновление статуса заявки</h2>
+        <p>Статус вашей заявки "${formName}" был обновлен.</p>
+        <div style="background-color: #f3f4f6; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <p><strong>Новый статус:</strong> ${getStatusText(status)}</p>
+          ${comment ? `<p><strong>Комментарий:</strong> ${comment}</p>` : ''}
+        </div>
+        <p>Вы можете просмотреть подробности в своем личном кабинете.</p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw new Error('Failed to send email');
+  }
+};
