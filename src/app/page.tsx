@@ -234,8 +234,14 @@ export default function Home() {
                         </motion.button>
                       )}
                       <Link 
-                        href={`/form_renderer/${form.formId}`}
+                        href={`/edit_answer/${form.id}`}
                         className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-full text-center transition-all duration-200 ease-in-out"
+                      >
+                        Редактировать ответы
+                      </Link>
+                      <Link 
+                        href={`/form_renderer/${form.formId}`}
+                        className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-full text-center transition-all duration-200 ease-in-out"
                       >
                         Отправить снова
                       </Link>
