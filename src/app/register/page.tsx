@@ -22,9 +22,9 @@ export default function Register() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, name, second_name: secondName, surname }),
     });
-
+  
     if (response.ok) {
-      router.push('/login');
+      router.push('/');
     } else {
       toast.error('Пользователь с такой эл. почтой уже существует.', {
         position: "bottom-right",

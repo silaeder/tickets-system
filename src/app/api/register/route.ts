@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../db/db';
 import bcrypt from 'bcrypt';
+import { signToken } from '../../utils/jwt';
 
 export async function POST(request: Request) {
   const { email, password, name, second_name, surname } = await request.json();
@@ -28,5 +29,17 @@ export async function POST(request: Request) {
     },
   });
 
-  return NextResponse.json({ message: 'User registered successfully', userId: newUser.id });
+  const token = await signToken({ userId: newUser.id });
+
+  const response = NextResponse.json({ message: 'User registered successfully', userId: newUser.id });
+  response.cookies.set({
+    name: 'token',
+    value: token,
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+    maxAge: 31536000
+  });
+
+  return response;
 }

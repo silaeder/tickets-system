@@ -11,7 +11,7 @@ type Field = {
   type: string;
   required: boolean;
   options?: string[];
-  visibilityCondition?: {
+  requirementCondition?: {
     dependsOn: string;
     value: string;
   };
@@ -64,10 +64,10 @@ export default function FormRenderer() {
     }
   };
 
-  const isFieldVisible = (field: Field): boolean => {
-    if (!field.visibilityCondition) return true;
+  const isFieldRequired = (field: Field): boolean => {
+    if (!field.requirementCondition) return field.required;
     
-    const { dependsOn, value } = field.visibilityCondition;
+    const { dependsOn, value } = field.requirementCondition;
     return values[dependsOn] === value;
   };
 
@@ -114,71 +114,69 @@ export default function FormRenderer() {
         >
           <AnimatePresence>
             {fields.map((field) => (
-              isFieldVisible(field) && (
-                <motion.div 
-                  key={field.id} 
-                  className="bg-white p-6 rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <label className="block mb-2 font-semibold text-gray-700">
-                    {field.label}
-                    {field.required && <span className="text-red-500 ml-1">*</span>}
-                  </label>
+              <motion.div 
+                key={field.id} 
+                className="bg-white p-6 rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <label className="block mb-2 font-semibold text-gray-700">
+                  {field.label}
+                  {isFieldRequired(field) && <span className="text-red-500 ml-1">*</span>}
+                </label>
 
-                  {field.type === 'select' ? (
-                    <div className="relative">
-                      <select
-                        value={values[field.id] || ''}
-                        onChange={(e) => setValues({ ...values, [field.id]: e.target.value })}
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white text-sm"
-                        required={field.required}
-                      >
-                        <option value="">Выберите опцию</option>
-                        {field.options?.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                          <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                        </svg>
-                      </div>
+                {field.type === 'select' ? (
+                  <div className="relative">
+                    <select
+                      value={values[field.id] || ''}
+                      onChange={(e) => setValues({ ...values, [field.id]: e.target.value })}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white text-sm"
+                      required={isFieldRequired(field)}
+                    >
+                      <option value="">Выберите опцию</option>
+                      {field.options?.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                      <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                      </svg>
                     </div>
-                  ) : field.type === 'checkbox' ? (
-                    <label className="inline-flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={values[field.id] === 'true'}
-                        onChange={(e) => setValues({ ...values, [field.id]: e.target.checked.toString() })}
-                        required={field.required}
-                        className="form-checkbox h-5 w-5 text-blue-600 transition duration-150 ease-in-out rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-gray-700">Да</span>
-                    </label>
-                  ) : field.type === 'textarea' ? (
-                    <textarea
-                      value={values[field.id] || ''}
-                      onChange={(e) => setValues({ ...values, [field.id]: e.target.value })}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
-                      required={field.required}
-                      rows={4}
-                    />
-                  ) : (
+                  </div>
+                ) : field.type === 'checkbox' ? (
+                  <label className="inline-flex items-center">
                     <input
-                      type={field.type}
-                      value={values[field.id] || ''}
-                      onChange={(e) => setValues({ ...values, [field.id]: e.target.value })}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                      required={field.required}
+                      type="checkbox"
+                      checked={values[field.id] === 'true'}
+                      onChange={(e) => setValues({ ...values, [field.id]: e.target.checked.toString() })}
+                      required={isFieldRequired(field)}
+                      className="form-checkbox h-5 w-5 text-blue-600 transition duration-150 ease-in-out rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
                     />
-                  )}
-                </motion.div>
-              )
+                    <span className="ml-2 text-gray-700">Да</span>
+                  </label>
+                ) : field.type === 'textarea' ? (
+                  <textarea
+                    value={values[field.id] || ''}
+                    onChange={(e) => setValues({ ...values, [field.id]: e.target.value })}
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+                    required={isFieldRequired(field)}
+                    rows={4}
+                  />
+                ) : (
+                  <input
+                    type={field.type}
+                    value={values[field.id] || ''}
+                    onChange={(e) => setValues({ ...values, [field.id]: e.target.value })}
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    required={isFieldRequired(field)}
+                  />
+                )}
+              </motion.div>
             ))}
           </AnimatePresence>
 

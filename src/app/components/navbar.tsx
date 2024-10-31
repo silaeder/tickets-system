@@ -60,7 +60,7 @@ export default function Navbar() {
                 >
                   <FiHome className="h-5 w-5 text-white" />
                 </motion.div>
-                <span>TicketSystem</span>
+                <span>Конференция Силаэдр</span>
               </Link>
             </motion.div>
           </div>
@@ -68,13 +68,13 @@ export default function Navbar() {
           {!isLoading && (
             <>
               <div className="hidden sm:flex sm:items-center sm:space-x-4">
-                <NavLink href="/" isActive={pathname === '/'}>
-                  <FiHome className="h-4 w-4 mr-2" />
-                  Главная
-                </NavLink>
-
                 {user?.is_admin && (
                   <>
+                    <NavLink href="/" isActive={pathname === '/'}>
+                      <FiHome className="h-4 w-4 mr-2" />
+                      Главная
+                    </NavLink>
+
                     <NavLink href="/my_forms" isActive={pathname === '/my_forms'}>
                       <FiFileText className="h-4 w-4 mr-2" />
                       Мои формы
@@ -122,11 +122,11 @@ export default function Navbar() {
             className="sm:hidden bg-white/70 backdrop-blur-lg"
           >
             <div className="px-4 pt-2 pb-3 space-y-1">
-              <MobileNavLink href="/" icon={<FiHome />} isActive={pathname === '/'}>
-                Главная
-              </MobileNavLink>
               {user?.is_admin && (
                 <>
+                  <MobileNavLink href="/" icon={<FiHome />} isActive={pathname === '/'}>
+                    Главная
+                  </MobileNavLink>
                   <MobileNavLink href="/my_forms" icon={<FiFileText />} isActive={pathname === '/my_forms'}>
                     Мои формы
                   </MobileNavLink>

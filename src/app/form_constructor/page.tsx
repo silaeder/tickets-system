@@ -11,7 +11,7 @@ type Field = {
   type: string;
   required: boolean;
   options?: string[];
-  visibilityCondition?: {
+  requirementCondition?: {
     dependsOn: string;
     value: string;
   };
@@ -199,16 +199,16 @@ export default function FormConstructor() {
 
                 <div className="mt-3">
                   <select
-                    value={field.visibilityCondition?.dependsOn || ''}
+                    value={field.requirementCondition?.dependsOn || ''}
                     onChange={(e) => {
                       if (e.target.value === '') {
-                        const { visibilityCondition, ...rest } = field;
+                        const { requirementCondition, ...rest } = field;
                         updateField(index, rest);
                       } else {
                         updateField(index, {
-                          visibilityCondition: {
+                          requirementCondition: {
                             dependsOn: e.target.value,
-                            value: field.visibilityCondition?.value || ''
+                            value: field.requirementCondition?.value || ''
                           }
                         });
                       }
@@ -216,22 +216,22 @@ export default function FormConstructor() {
                     className="p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white mr-2"
                     style={{backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 0.5rem center", backgroundSize: "1.5em 1.5em", paddingRight: "2.5rem"}}
                   >
-                    <option value="">Всегда видимо</option>
+                    <option value="">Условие объязательности</option>
                     {fields.slice(0, index).map(f => (
                       <option key={f.id} value={f.id}>
-                        Показывать если {f.label} равно:
+                        Обязательно если {f.label} равно:
                       </option>
                     ))}
                   </select>
 
-                  {field.visibilityCondition && (
+                  {field.requirementCondition && (
                     <input
                       type="text"
-                      placeholder="Значение для показа"
-                      value={field.visibilityCondition.value}
+                      placeholder="Значение для обязательности"
+                      value={field.requirementCondition.value}
                       onChange={(e) => updateField(index, {
-                        visibilityCondition: {
-                          dependsOn: field.visibilityCondition?.dependsOn || '',
+                        requirementCondition: {
+                          dependsOn: field.requirementCondition?.dependsOn || '',
                           value: e.target.value
                         }
                       })}
