@@ -14,6 +14,8 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendResetCode = async (email: string, code: string) => {
+  if (email === 'admin@admin.com') return;
+
   const mailOptions = {
     from: process.env.SMTP_USER,
     to: email,
@@ -48,6 +50,8 @@ export const sendStatusUpdateEmail = async (
   },
   comment: string | null
 ) => {
+  if (email === 'admin@admin.com') return;
+
   const getStatusText = (status: any) => {
     if (status.approved) return 'Одобрено';
     if (status.waiting) return 'Ожидает проверки';
