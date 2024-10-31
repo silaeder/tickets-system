@@ -103,7 +103,7 @@ export default function Login() {
                         <Link href="/register" className="text-blue-500 hover:text-blue-700 font-semibold transition duration-300">
                             Зарегистрироваться
                         </Link>
-                        <Link href="/forgot-password" className="text-blue-500 hover:text-blue-700 font-semibold transition duration-300">
+                        <Link href="/forgot_password" className="text-blue-500 hover:text-blue-700 font-semibold transition duration-300">
                             Забыли пароль?
                         </Link>
                     </motion.div>

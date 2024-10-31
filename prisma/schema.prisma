@@ -21,6 +21,9 @@ model User {
 
   forms Form[]
   answers Answer[]
+
+  resetCode String?
+  resetCodeExpiry DateTime?
 }
 
 model Answer {
