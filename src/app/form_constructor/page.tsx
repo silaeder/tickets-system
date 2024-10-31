@@ -10,6 +10,7 @@ type Field = {
   label: string;
   type: string;
   required: boolean;
+  description?: string;
   options?: string[];
   requirementCondition?: {
     dependsOn: string;
@@ -27,7 +28,8 @@ export default function FormConstructor() {
       id: `field_${Date.now()}`,
       label: '',
       type: 'text',
-      required: false
+      required: false,
+      description: ''
     };
     setFields([...fields, newField]);
   };
@@ -146,6 +148,16 @@ export default function FormConstructor() {
                     <option value="checkbox">Чекбокс</option>
                     <option value="textarea">Текстовая область</option>
                   </select>
+                </div>
+
+                <div className="mt-3">
+                  <input
+                    type="text"
+                    placeholder="Описание поля"
+                    value={field.description || ''}
+                    onChange={(e) => updateField(index, { description: e.target.value })}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  />
                 </div>
 
                 {field.type === 'select' && (

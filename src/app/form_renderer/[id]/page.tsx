@@ -10,6 +10,7 @@ type Field = {
   label: string;
   type: string;
   required: boolean;
+  description?: string;
   options?: string[];
   requirementCondition?: {
     dependsOn: string;
@@ -122,17 +123,28 @@ export default function FormRenderer() {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                <label className="block mb-2 font-semibold text-gray-700">
-                  {field.label}
-                  {isFieldRequired(field) && <span className="text-red-500 ml-1">*</span>}
-                </label>
+                <div className="mb-4">
+                  <label className="block font-semibold text-gray-700">
+                    {field.label}
+                    {isFieldRequired(field) && <span className="text-red-500 ml-1">*</span>}
+                  </label>
+                  {field.description && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-sm text-gray-500 mt-1"
+                    >
+                      {field.description}
+                    </motion.p>
+                  )}
+                </div>
 
                 {field.type === 'select' ? (
                   <div className="relative">
                     <select
                       value={values[field.id] || ''}
                       onChange={(e) => setValues({ ...values, [field.id]: e.target.value })}
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white text-sm"
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white text-sm focus:outline-none"
                       required={isFieldRequired(field)}
                     >
                       <option value="">Выберите опцию</option>
@@ -149,21 +161,44 @@ export default function FormRenderer() {
                     </div>
                   </div>
                 ) : field.type === 'checkbox' ? (
-                  <label className="inline-flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={values[field.id] === 'true'}
-                      onChange={(e) => setValues({ ...values, [field.id]: e.target.checked.toString() })}
-                      required={isFieldRequired(field)}
-                      className="form-checkbox h-5 w-5 text-blue-600 transition duration-150 ease-in-out rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
-                    />
-                    <span className="ml-2 text-gray-700">Да</span>
+                  <label className="inline-flex items-center cursor-pointer">
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        checked={values[field.id] === 'true'}
+                        onChange={(e) => setValues({ ...values, [field.id]: e.target.checked.toString() })}
+                        required={isFieldRequired(field)}
+                        className="sr-only"
+                      />
+                      <div className={`w-6 h-6 border-2 rounded-md transition-all duration-200 ${
+                        values[field.id] === 'true' 
+                          ? 'bg-blue-500 border-blue-500' 
+                          : 'bg-white border-gray-300'
+                      }`}>
+                        {values[field.id] === 'true' && (
+                          <svg 
+                            className="w-5 h-5 text-white" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path 
+                              strokeLinecap="round" 
+                              strokeLinejoin="round" 
+                              strokeWidth="2" 
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                    <span className="ml-3 text-gray-700">Да</span>
                   </label>
                 ) : field.type === 'textarea' ? (
                   <textarea
                     value={values[field.id] || ''}
                     onChange={(e) => setValues({ ...values, [field.id]: e.target.value })}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none focus:outline-none"
                     required={isFieldRequired(field)}
                     rows={4}
                   />
@@ -172,7 +207,7 @@ export default function FormRenderer() {
                     type={field.type}
                     value={values[field.id] || ''}
                     onChange={(e) => setValues({ ...values, [field.id]: e.target.value })}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 focus:outline-none"
                     required={isFieldRequired(field)}
                   />
                 )}
