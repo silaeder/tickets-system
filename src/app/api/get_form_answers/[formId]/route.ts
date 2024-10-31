@@ -48,7 +48,7 @@ export async function GET(request: Request, { params }: { params: { formId: stri
   }
 }
 
-export function isComment(obj: any): obj is Comment {
+function isComment(obj: any): obj is Comment {
   return (
     typeof obj === 'object' &&
     obj !== null &&
@@ -59,7 +59,7 @@ export function isComment(obj: any): obj is Comment {
   );
 }
 
-export function isCommentArray(arr: any): arr is Comment[] {
+function isCommentArray(arr: any): arr is Comment[] {
   return Array.isArray(arr) && arr.every(isComment);
 }
 
