@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ToastContainer, toast, Bounce } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -69,6 +70,15 @@ export default function Login() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="w-full max-w-md"
             >
+                <div className="flex justify-center mb-6">
+                    <Image
+                        src="/logo.png"
+                        alt="Logo"
+                        width={150}
+                        height={150}
+                        priority
+                    />
+                </div>
                 <form className="bg-white shadow-2xl rounded-lg px-10 pt-8 pb-10" onSubmit={handleSubmit}>
                     <motion.h1 
                         initial={{ y: -20, opacity: 0 }}

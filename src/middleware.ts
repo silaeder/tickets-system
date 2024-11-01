@@ -26,5 +26,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: '/((?!api/login|login|api/register|register|api/forgot_password|forgot_password|api/verify_code|api/reset_password|_next).*)',
+  matcher: '/((?!api/login|login|api/register|register|api/forgot_password|forgot_password|api/verify_code|api/reset_password|_next|logo.png).*)',
 };

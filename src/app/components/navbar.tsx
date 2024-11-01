@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiMenu, FiX, FiHome, FiFileText, FiLogOut, FiPlus } from 'react-icons/fi';
 import { useRouter, usePathname } from 'next/navigation';
+import Image from 'next/image';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,9 +57,15 @@ export default function Navbar() {
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="bg-gradient-to-r from-blue-500 to-indigo-500 p-2 rounded-lg"
                 >
-                  <FiHome className="h-5 w-5 text-white" />
+                  <Image
+                    src="/logo.png"
+                    alt="Logo"
+                    width={32}
+                    height={32}
+                    className="rounded border-2"
+                    priority
+                  />
                 </motion.div>
                 <span>Конференция Силаэдр</span>
               </Link>

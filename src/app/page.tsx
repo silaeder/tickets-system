@@ -243,7 +243,7 @@ export default function Home() {
                         href={`/form_renderer/${form.formId}`}
                         className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-full text-center transition-all duration-200 ease-in-out"
                       >
-                        Отправить снова
+                        Отправить еще одну заявку
                       </Link>
                     </div>
                   </motion.div>
