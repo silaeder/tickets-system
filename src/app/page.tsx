@@ -183,17 +183,15 @@ export default function Home() {
               <h1 className="text-4xl font-bold mb-8 text-gray-800 text-center">Доступные заявки</h1>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {availableForms.map((form) => (
-                  <motion.div
+                  <div
                     key={form.id}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                    className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-all duration-200 ease-in-out transform hover:-translate-y-1"
+                    className="bg-white rounded-lg p-6 shadow-lg transition-all duration-200 ease-in-out"
                   >
                     <h2 className="text-2xl font-semibold mb-4 text-gray-800">{form.name}</h2>
                     <Link href={`/form_renderer/${form.id}`} className="inline-block bg-[#397698] text-white px-6 py-3 rounded-full hover:bg-[#2c5a75] transition-all duration-200 ease-in-out text-center w-full">
                       Заполнить форму
                     </Link>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </motion.section>
@@ -209,11 +207,9 @@ export default function Home() {
               <h1 className="text-4xl font-bold mb-8 text-gray-800 text-center">Отправленные заявки</h1>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {completedForms.map((form) => (
-                  <motion.div
+                  <div
                     key={form.id}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                    className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-all duration-200 ease-in-out"
+                    className="bg-white rounded-lg p-6 shadow-lg transition-all duration-200 ease-in-out"
                   >
                     <h2 className="text-2xl font-semibold mb-4 text-gray-800">{form.form.name}</h2>
                     <div className={`${getStatusColor(form.status)} px-4 py-2 rounded-full inline-block text-sm font-medium mb-4 transition-all duration-200 ease-in-out`}>
@@ -222,9 +218,9 @@ export default function Home() {
                     <div className="flex flex-col space-y-3">
                       {form.status.comments && form.status.comments.length > 0 && (
                         <motion.button
-                          whileHover={{ scale: 1.03 }}
-                          whileTap={{ scale: 0.97 }}
-                          className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-full transition-all duration-200 ease-in-out"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-full transition-colors duration-200 ease-in-out"
                           onClick={() => {
                             setSelectedFormComments(form.status.comments);
                             setSelectedFormId(form.id);
@@ -233,20 +229,32 @@ export default function Home() {
                           Комментарии ({form.status.comments.length})
                         </motion.button>
                       )}
-                      <Link 
-                        href={`/edit_answer/${form.id}`}
-                        className="w-full bg-[#397698] hover:bg-[#2c5a75] text-white font-medium py-2 px-4 rounded-full text-center transition-all duration-200 ease-in-out"
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-full flex"
                       >
-                        Редактировать ответы
-                      </Link>
-                      <Link 
-                        href={`/form_renderer/${form.formId}`}
-                        className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-full text-center transition-all duration-200 ease-in-out"
+                        <Link 
+                          href={`/edit_answer/${form.id}`}
+                          className="w-full bg-[#397698] hover:bg-[#2c5a75] text-white font-medium py-2 px-4 rounded-full text-center transition-colors duration-200 ease-in-out"
+                        >
+                          Редактировать ответы
+                        </Link>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-full flex"
                       >
-                        Отправить еще одну заявку
-                      </Link>
+                        <Link 
+                          href={`/form_renderer/${form.formId}`}
+                          className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-full text-center transition-all duration-200 ease-in-out"
+                        >
+                          Отправить еще одну заявку
+                        </Link>
+                      </motion.div>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </motion.section>
