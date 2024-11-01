@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '../components/navbar';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -21,8 +21,34 @@ type Field = {
 export default function FormConstructor() {
   const [formName, setFormName] = useState('');
   const [fields, setFields] = useState<Field[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    checkAdminStatus();
+  }, []);
+
+  const checkAdminStatus = async () => {
+    try {
+      const response = await fetch('/api/user');
+      if (response.ok) {
+        const userData = await response.json();
+        setIsAdmin(userData.is_admin);
+        if (!userData.is_admin) {
+          router.push('/');
+        }
+      } else {
+        router.push('/login');
+      }
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      router.push('/login');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const addField = () => {
     const newField: Field = {
@@ -70,7 +96,7 @@ export default function FormConstructor() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setSubmitting(true);
     try {
       const response = await fetch('/api/save_form', {
         method: 'POST',
@@ -82,15 +108,35 @@ export default function FormConstructor() {
       });
 
       if (response.ok) {
-        const data = await response.json();
         router.push('/my_forms');
       }
     } catch (error) {
       console.error('Error saving form:', error);
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
+
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex justify-center items-center"
+      >
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+          className="rounded-full h-24 w-24 border-t-2 border-b-2 border-[#397698]"
+        />
+      </motion.div>
+    );
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-gray-100 to-gray-200">

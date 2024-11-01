@@ -14,6 +14,16 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Check if user is admin
+    const user = await prisma.user.findUnique({
+      where: { id: parseInt(userId) },
+      select: { is_admin: true }
+    });
+
+    if (!user?.is_admin) {
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 403 });
+    }
+
     const newForm = await prisma.form.create({
         data: {
           name,
