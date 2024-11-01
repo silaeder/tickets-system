@@ -106,6 +106,13 @@ export default function MyForms() {
                         </svg>
                         Просмотреть ответы
                       </Link>
+                      <Link href={`/edit_form/${form.id}`} className="text-orange-500 hover:text-orange-600 font-medium transition-colors duration-300 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-12 12a2 2 0 01-2.828 0 2 2 0 010-2.828l12-12z" />
+                          <path d="M16.414 6.414l-7.586 7.586a1 1 0 11-1.414-1.414l7.586-7.586a1 1 0 011.414 1.414z" />
+                        </svg>
+                        Редактировать форму
+                      </Link>
                     </div>
                   </motion.div>
                 ))}
