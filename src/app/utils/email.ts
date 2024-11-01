@@ -17,7 +17,7 @@ export const sendResetCode = async (email: string, code: string) => {
   if (email === 'admin@admin.com') return;
 
   const mailOptions = {
-    from: process.env.SMTP_USER,
+    from: process.env.SMTP_FROM,
     to: email,
     subject: 'Код для сброса пароля',
     html: `
@@ -60,7 +60,7 @@ export const sendStatusUpdateEmail = async (
   };
 
   const mailOptions = {
-    from: process.env.SMTP_USER,
+    from: process.env.SMTP_FROM,
     to: email,
     subject: `Обновление статуса заявки "${formName}"`,
     html: `
