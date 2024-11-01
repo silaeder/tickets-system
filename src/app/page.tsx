@@ -188,9 +188,15 @@ export default function Home() {
                     className="bg-white rounded-lg p-6 shadow-lg transition-all duration-200 ease-in-out"
                   >
                     <h2 className="text-2xl font-semibold mb-4 text-gray-800">{form.name}</h2>
-                    <Link href={`/form_renderer/${form.id}`} className="inline-block bg-[#397698] text-white px-6 py-3 rounded-full hover:bg-[#2c5a75] transition-all duration-200 ease-in-out text-center w-full">
-                      Заполнить форму
-                    </Link>
+                    <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-full flex"
+                    >
+                      <Link href={`/form_renderer/${form.id}`} className="inline-block bg-[#397698] text-white px-6 py-3 rounded-full hover:bg-[#2c5a75] transition-all duration-200 ease-in-out text-center w-full">
+                        Заполнить форму
+                      </Link>
+                    </motion.div>
                   </div>
                 ))}
               </div>
