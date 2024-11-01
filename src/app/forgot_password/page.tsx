@@ -199,7 +199,7 @@ export default function ForgotPassword() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-100 to-purple-100"
+      className="flex items-center justify-center min-h-screen bg-gradient-to-r from-[#e8eff4] to-[#f9f3e2]"
     >
       <ToastContainer />
       <motion.div 
@@ -242,7 +242,7 @@ export default function ForgotPassword() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#397698] focus:border-transparent transition duration-300"
                 placeholder="your@email.com"
               />
             </motion.div>
@@ -276,8 +276,8 @@ export default function ForgotPassword() {
                     className={`w-10 h-10 text-center text-xl font-bold rounded-md border-2 
                       ${isCodeInvalid 
                         ? 'border-red-500 bg-red-50' 
-                        : 'border-gray-300 focus:border-blue-500'} 
-                      focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300
+                        : 'border-gray-300 focus:border-[#397698]'} 
+                      focus:outline-none focus:ring-2 focus:ring-[#397698] transition-all duration-300
                       shadow-sm hover:shadow-md`}
                     required
                   />
@@ -311,7 +311,7 @@ export default function ForgotPassword() {
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className={`shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300 ${newPassword && confirmPassword && newPassword !== confirmPassword ? 'border-red-500 bg-red-50' : ''}`}
+                  className={`shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#397698] focus:border-transparent transition duration-300 ${newPassword && confirmPassword && newPassword !== confirmPassword ? 'border-red-500 bg-red-50' : ''}`}
                   placeholder="••••••••"
                 />
               </motion.div>
@@ -330,7 +330,7 @@ export default function ForgotPassword() {
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className={`shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300 ${newPassword && confirmPassword && newPassword !== confirmPassword ? 'border-red-500 bg-red-50' : ''}`}
+                  className={`shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#397698] focus:border-transparent transition duration-300 ${newPassword && confirmPassword && newPassword !== confirmPassword ? 'border-red-500 bg-red-50' : ''}`}
                   placeholder="••••••••"
                 />
                 {newPassword && confirmPassword && newPassword !== confirmPassword && (
@@ -352,7 +352,7 @@ export default function ForgotPassword() {
             transition={{ duration: 0.5, delay: 0.6 }}
             className="flex items-center justify-between mb-6"
           >
-            <Link href="/login" className="text-blue-500 hover:text-blue-700 font-semibold transition duration-300">
+            <Link href="/login" className="text-[#397698] hover:text-[#2c5a75] font-semibold transition duration-300">
               Вернуться к входу
             </Link>
           </motion.div>
@@ -364,9 +364,9 @@ export default function ForgotPassword() {
             className="flex items-center justify-center"
           >
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out flex items-center gap-2"
+              whileHover={{ scale: isLoading ? 1 : 1.05 }}
+              whileTap={{ scale: isLoading ? 1 : 0.95 }}
+              className="bg-[#397698] hover:bg-[#2c5a75] text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline transition-colors duration-200 ease-in-out flex items-center gap-2 min-w-[120px]"
               type="submit"
               disabled={isLoading}
             >

@@ -113,7 +113,7 @@ export default function Home() {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 20 }}
           transition={{ duration: 0.3 }}
-          className={`mb-4 p-4 rounded-lg transition-all duration-300 ease-in-out ${isReplying ? 'bg-blue-100 border-l-4 border-blue-500' : 'bg-white shadow-lg hover:shadow-xl border border-gray-200'}`}
+          className={`mb-4 p-4 rounded-lg transition-all duration-300 ease-in-out ${isReplying ? 'bg-[#397698] bg-opacity-10 border-l-4 border-[#397698]' : 'bg-white shadow-lg hover:shadow-xl border border-gray-200'}`}
         >
           <p className="font-semibold text-gray-800">{comment.sender}</p>
           <p className="mt-2 text-gray-700">{comment.text}</p>
@@ -122,7 +122,7 @@ export default function Home() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className={`ml-4 px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 ease-in-out ${isReplying ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+              className={`ml-4 px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 ease-in-out ${isReplying ? 'bg-[#397698] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
               onClick={() => setReplyTo(currentIndices)}
             >
               {isReplying ? 'Отвечаете' : 'Ответить'}
@@ -155,7 +155,7 @@ export default function Home() {
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
-          className="rounded-full h-24 w-24 border-t-2 border-b-2 border-blue-500"
+          className="rounded-full h-24 w-24 border-t-2 border-b-2 border-[#397698]"
         />
       </motion.div>
     );
@@ -190,7 +190,7 @@ export default function Home() {
                     className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-all duration-200 ease-in-out transform hover:-translate-y-1"
                   >
                     <h2 className="text-2xl font-semibold mb-4 text-gray-800">{form.name}</h2>
-                    <Link href={`/form_renderer/${form.id}`} className="inline-block bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition-all duration-200 ease-in-out text-center w-full">
+                    <Link href={`/form_renderer/${form.id}`} className="inline-block bg-[#397698] text-white px-6 py-3 rounded-full hover:bg-[#2c5a75] transition-all duration-200 ease-in-out text-center w-full">
                       Заполнить форму
                     </Link>
                   </motion.div>
@@ -235,13 +235,13 @@ export default function Home() {
                       )}
                       <Link 
                         href={`/edit_answer/${form.id}`}
-                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-full text-center transition-all duration-200 ease-in-out"
+                        className="w-full bg-[#397698] hover:bg-[#2c5a75] text-white font-medium py-2 px-4 rounded-full text-center transition-all duration-200 ease-in-out"
                       >
                         Редактировать ответы
                       </Link>
                       <Link 
                         href={`/form_renderer/${form.formId}`}
-                        className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-full text-center transition-all duration-200 ease-in-out"
+                        className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-full text-center transition-all duration-200 ease-in-out"
                       >
                         Отправить снова
                       </Link>
@@ -288,13 +288,13 @@ export default function Home() {
                     <div className="flex items-center">
                       <input
                         type="text"
-                        className="flex-grow p-3 border rounded-l-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ease-in-out"
+                        className="flex-grow p-3 border rounded-l-full focus:outline-none focus:ring-2 focus:ring-[#397698] transition-all duration-200 ease-in-out"
                         placeholder="Напишите ответ..."
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
                       />
                       <button
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-r-full transition-all duration-200 ease-in-out"
+                        className="bg-[#397698] hover:bg-[#2c5a75] text-white px-6 py-3 rounded-r-full transition-all duration-200 ease-in-out"
                         onClick={handleReply}
                       >
                         Отправить

@@ -129,7 +129,7 @@ export default function ShowAnswers() {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 20 }}
           transition={{ duration: 0.3 }}
-          className={`mb-4 p-4 rounded-lg transition-all duration-300 ease-in-out ${isReplying ? 'bg-blue-100 border-l-4 border-blue-500' : 'bg-white shadow-lg hover:shadow-xl border border-gray-200'}`}
+          className={`mb-4 p-4 rounded-lg transition-all duration-300 ease-in-out ${isReplying ? 'bg-[#397698]/20 border-l-4 border-[#397698]' : 'bg-white shadow-lg hover:shadow-xl border border-gray-200'}`}
         >
           <p className="font-semibold text-gray-800">{comment.sender}</p>
           <p className="mt-2 text-gray-700">{comment.text}</p>
@@ -138,7 +138,7 @@ export default function ShowAnswers() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className={`ml-4 px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 ease-in-out ${isReplying ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+              className={`ml-4 px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none ${isReplying ? 'bg-[#397698] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
               onClick={() => setReplyTo(isReplying ? null : { answerId, indices: currentIndices })}
               disabled={updatingAnswerId !== null}
             >
@@ -162,7 +162,7 @@ export default function ShowAnswers() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-[#F5F7F9]">
       <Navbar />
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -170,7 +170,7 @@ export default function ShowAnswers() {
         transition={{ duration: 0.5 }}
         className="container mx-auto p-6"
       >
-        <h1 className="text-4xl font-bold mb-8 text-gray-800">Ответы на форму</h1>
+        <h1 className="text-4xl font-bold mb-8 text-[#2D384B]">Ответы на форму</h1>
         {error && (
           <motion.p
             initial={{ opacity: 0, x: -20 }}
@@ -192,7 +192,7 @@ export default function ShowAnswers() {
               className="bg-white rounded-lg p-6 shadow-lg mb-8 hover:shadow-xl"
             >
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-semibold text-gray-800">
+                <h2 className="text-2xl font-semibold text-[#2D384B]">
                   {answer.user.name} {answer.user.surname}
                 </h2>
                 <motion.span
@@ -206,7 +206,7 @@ export default function ShowAnswers() {
               </div>
               <div className="mb-4">
                 <textarea
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-all duration-200 resize-none focus:outline-none"
                   placeholder={replyTo && replyTo.answerId === answer.id ? "Отвечаете на комментарий..." : "Оставить комментарий..."}
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
@@ -219,7 +219,7 @@ export default function ShowAnswers() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.1 }}
-                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow relative"
+                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow relative focus:outline-none"
                   onClick={() => updateStatus(answer.id, { approved: true, waiting: false, edits_required: false }, comment, 'approve')}
                   disabled={updatingAnswerId !== null}
                 >
@@ -237,7 +237,7 @@ export default function ShowAnswers() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.1 }}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow relative"
+                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow relative focus:outline-none"
                   onClick={() => updateStatus(answer.id, { approved: false, waiting: true, edits_required: false }, comment, 'waiting')}
                   disabled={updatingAnswerId !== null}
                 >
@@ -255,7 +255,7 @@ export default function ShowAnswers() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.1 }}
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow relative"
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow relative focus:outline-none"
                   onClick={() => updateStatus(answer.id, { approved: false, waiting: false, edits_required: true }, comment, 'edits')}
                   disabled={updatingAnswerId !== null}
                 >
@@ -273,7 +273,7 @@ export default function ShowAnswers() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.1 }}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow relative"
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow relative focus:outline-none"
                   onClick={() => updateStatus(answer.id, { approved: false, waiting: false, edits_required: false }, comment, 'reject')}
                   disabled={updatingAnswerId !== null}
                 >
@@ -292,14 +292,14 @@ export default function ShowAnswers() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3, delay: 0.2 }}
-                className="bg-gray-50 p-4 rounded-lg shadow-inner"
+                className="bg-[#F5F7F9] p-4 rounded-lg shadow-inner"
               >
                 {Object.entries(answer.answers).map(([fieldId, value]) => {
                   const field = answer.form.form_description.find(f => f.id === fieldId);
                   return (
                     <p key={fieldId} className="mb-2">
-                      <strong className="text-gray-700">{field?.label || fieldId}:</strong>{' '}
-                      <span className="text-gray-600">{value.toString()}</span>
+                      <strong className="text-[#2D384B]">{field?.label || fieldId}:</strong>{' '}
+                      <span className="text-[#4A5567]">{value.toString()}</span>
                     </p>
                   );
                 })}
@@ -310,7 +310,7 @@ export default function ShowAnswers() {
                 transition={{ duration: 0.3, delay: 0.3 }}
                 className="mt-6"
               >
-                <h3 className="font-semibold text-xl mb-3 text-gray-800">Комментарии:</h3>
+                <h3 className="font-semibold text-xl mb-3 text-[#2D384B]">Комментарии:</h3>
                 <AnimatePresence>
                   {renderComments(answer.status.comments, answer.id)}
                 </AnimatePresence>

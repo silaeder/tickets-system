@@ -85,7 +85,7 @@ export default function FormRenderer() {
         exit={{ opacity: 0 }}
       >
         <motion.div 
-          className="rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"
+          className="rounded-full h-32 w-32 border-t-2 border-b-2 border-[#397698]"
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
         />
@@ -95,7 +95,7 @@ export default function FormRenderer() {
 
   return (
     <motion.div 
-      className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100"
+      className="min-h-screen bg-gradient-to-br from-[#e8eff4] to-[#f9f3e2]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -148,7 +148,7 @@ export default function FormRenderer() {
                     <select
                       value={values[field.id] || ''}
                       onChange={(e) => setValues({ ...values, [field.id]: e.target.value })}
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white text-sm focus:outline-none"
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-all duration-200 appearance-none bg-white text-sm focus:outline-none"
                       required={isFieldRequired(field)}
                     >
                       <option value="">Выберите опцию</option>
@@ -176,7 +176,7 @@ export default function FormRenderer() {
                       />
                       <div className={`w-6 h-6 border-2 rounded-md transition-all duration-200 ${
                         values[field.id] === 'true' 
-                          ? 'bg-blue-500 border-blue-500' 
+                          ? 'bg-[#397698] border-[#397698]' 
                           : 'bg-white border-gray-300'
                       }`}>
                         {values[field.id] === 'true' && (
@@ -202,7 +202,7 @@ export default function FormRenderer() {
                   <textarea
                     value={values[field.id] || ''}
                     onChange={(e) => setValues({ ...values, [field.id]: e.target.value })}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none focus:outline-none"
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-all duration-200 resize-none focus:outline-none"
                     required={isFieldRequired(field)}
                     rows={4}
                   />
@@ -211,7 +211,7 @@ export default function FormRenderer() {
                     type={field.type}
                     value={values[field.id] || ''}
                     onChange={(e) => setValues({ ...values, [field.id]: e.target.value })}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 focus:outline-none"
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-all duration-200 focus:outline-none"
                     required={isFieldRequired(field)}
                   />
                 )}
@@ -228,7 +228,7 @@ export default function FormRenderer() {
             <motion.button
               type="submit"
               disabled={submitting}
-              className="bg-blue-500 text-white px-8 py-3 rounded-full hover:bg-blue-600 transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 shadow-lg flex items-center justify-center gap-2"
+              className="bg-[#397698] text-white px-8 py-3 rounded-full hover:bg-[#2c5a75] transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#397698] focus:ring-opacity-50 shadow-lg flex items-center justify-center gap-2"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >

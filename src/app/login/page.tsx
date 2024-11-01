@@ -60,7 +60,7 @@ export default function Login() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-100 to-purple-100"
+            className="flex items-center justify-center min-h-screen bg-gradient-to-r from-[#e8eff4] to-[#f9f3e2]"
         >
             <ToastContainer />
             <motion.div 
@@ -88,7 +88,7 @@ export default function Login() {
                         <input
                             required
                             id="email"
-                            className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                            className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#397698] focus:border-transparent transition duration-300"
                             type="email"
                             placeholder="example@mail.com"
                             value={email}
@@ -105,7 +105,7 @@ export default function Login() {
                         <input
                             required
                             id="password"
-                            className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                            className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#397698] focus:border-transparent transition duration-300"
                             type="password"
                             placeholder="••••••••"
                             value={password}
@@ -118,10 +118,10 @@ export default function Login() {
                         transition={{ duration: 0.5, delay: 0.6 }}
                         className="flex items-center justify-between mb-8"
                     >
-                        <Link href="/register" className="text-blue-500 hover:text-blue-700 font-semibold transition duration-300">
+                        <Link href="/register" className="text-[#397698] hover:text-[#2c5a75] font-semibold transition duration-300">
                             Зарегистрироваться
                         </Link>
-                        <Link href="/forgot_password" className="text-blue-500 hover:text-blue-700 font-semibold transition duration-300">
+                        <Link href="/forgot_password" className="text-[#397698] hover:text-[#2c5a75] font-semibold transition duration-300">
                             Забыли пароль?
                         </Link>
                     </motion.div>
@@ -134,7 +134,7 @@ export default function Login() {
                         <motion.button
                             whileHover={{ scale: loading ? 1 : 1.05 }}
                             whileTap={{ scale: loading ? 1 : 0.95 }}
-                            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline transition-colors duration-200 ease-in-out flex items-center justify-center gap-2 min-w-[120px]"
+                            className="bg-[#397698] hover:bg-[#2c5a75] text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline transition-colors duration-200 ease-in-out flex items-center justify-center gap-2 min-w-[120px]"
                             type="submit"
                             disabled={loading}
                         >

@@ -93,7 +93,7 @@ export default function FormConstructor() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-r from-gray-100 to-gray-200">
       <Navbar />
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
@@ -116,7 +116,7 @@ export default function FormConstructor() {
               placeholder="Название формы"
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-all duration-200"
               required
             />
           </motion.div>
@@ -137,13 +137,13 @@ export default function FormConstructor() {
                     placeholder="Название поля"
                     value={field.label}
                     onChange={(e) => updateField(index, { label: e.target.value })}
-                    className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-all duration-200"
                     required
                   />
                   <select
                     value={field.type}
                     onChange={(e) => updateField(index, { type: e.target.value })}
-                    className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white"
+                    className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-all duration-200 appearance-none bg-white"
                     style={{backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 0.5rem center", backgroundSize: "1.5em 1.5em", paddingRight: "2.5rem"}}
                   >
                     <option value="text">Текст</option>
@@ -160,7 +160,7 @@ export default function FormConstructor() {
                     placeholder="Описание поля"
                     value={field.description || ''}
                     onChange={(e) => updateField(index, { description: e.target.value })}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-all duration-200"
                   />
                 </div>
 
@@ -186,7 +186,7 @@ export default function FormConstructor() {
                             type="text"
                             value={option}
                             onChange={(e) => updateOption(index, optionIndex, e.target.value)}
-                            className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 flex-grow"
+                            className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-all duration-200 flex-grow"
                             placeholder={`Опция ${optionIndex + 1}`}
                           />
                           <motion.button
@@ -194,7 +194,7 @@ export default function FormConstructor() {
                             whileTap={{ scale: 0.95 }}
                             type="button"
                             onClick={() => removeOption(index, optionIndex)}
-                            className="ml-2 bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition-colors duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                            className="ml-2 bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition-colors duration-200 text-sm"
                           >
                             Удалить
                           </motion.button>
@@ -206,7 +206,7 @@ export default function FormConstructor() {
                       whileTap={{ scale: 0.95 }}
                       type="button"
                       onClick={() => addOption(index)}
-                      className="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="mt-2 bg-[#397698] text-white px-4 py-2 rounded-md hover:bg-[#2c5a75] transition-colors duration-200 text-sm"
                     >
                       Добавить опцию
                     </motion.button>
@@ -229,7 +229,7 @@ export default function FormConstructor() {
                         });
                       }
                     }}
-                    className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white mr-2"
+                    className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-all duration-200 appearance-none bg-white mr-2"
                     style={{backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 0.5rem center", backgroundSize: "1.5em 1.5em", paddingRight: "2.5rem"}}
                   >
                     <option value="">Условие обязательности</option>
@@ -251,7 +251,7 @@ export default function FormConstructor() {
                           value: e.target.value
                         }
                       })}
-                      className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-all duration-200"
                     />
                   )}
                 </div>
@@ -265,7 +265,7 @@ export default function FormConstructor() {
                         onChange={(e) => updateField(index, { required: e.target.checked })}
                         className="sr-only"
                       />
-                      <div className={`block w-5 h-5 rounded border-2 transition-colors duration-200 ${field.required ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-300'}`}>
+                      <div className={`block w-5 h-5 rounded border-2 transition-colors duration-200 ${field.required ? 'bg-[#397698] border-[#397698]' : 'bg-white border-gray-300'}`}>
                         {field.required && (
                           <svg className="w-3 h-3 text-white absolute left-1 top-1" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M1 5L4.5 8.5L11 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -280,7 +280,7 @@ export default function FormConstructor() {
                     whileTap={{ scale: 0.95 }}
                     type="button"
                     onClick={() => removeField(index)}
-                    className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition-colors duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                    className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition-colors duration-200 text-sm"
                   >
                     Удалить поле
                   </motion.button>
@@ -300,7 +300,7 @@ export default function FormConstructor() {
               whileTap={{ scale: 0.95 }}
               type="button"
               onClick={addField}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="bg-[#397698] text-white px-4 py-2 rounded-md hover:bg-[#2c5a75] transition-colors duration-200 text-base font-semibold"
             >
               Добавить поле
             </motion.button>
@@ -309,7 +309,7 @@ export default function FormConstructor() {
               whileTap={{ scale: loading ? 1 : 0.95 }}
               type="submit"
               disabled={loading}
-              className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors duration-200 text-base font-semibold flex items-center justify-center gap-2 min-w-[160px] focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="text-white px-4 py-2 rounded-md bg-green-600 hover:bg-green-700 transition-colors duration-200 text-base font-semibold flex items-center justify-center gap-2 min-w-[160px]"
             >
               {loading ? (
                 <>
