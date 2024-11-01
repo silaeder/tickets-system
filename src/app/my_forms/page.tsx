@@ -89,7 +89,7 @@ export default function MyForms() {
                     key={form.id}
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
-                    className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-all duration-200 ease-in-out"
+                    className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-colors duration-200 ease-in-out"
                   >
                     <h2 className="text-2xl font-semibold mb-4 text-gray-800">{form.name}</h2>
                     <div className="flex flex-col space-y-3">
