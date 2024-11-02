@@ -116,7 +116,7 @@ export default function Home() {
           className={`mb-4 p-4 rounded-lg transition-all duration-300 ease-in-out ${isReplying ? 'bg-[#397698] bg-opacity-10 border-l-4 border-[#397698]' : 'bg-white shadow-lg hover:shadow-xl border border-gray-200'}`}
         >
           <p className="font-semibold text-gray-800">{comment.sender}</p>
-          <p className="mt-2 text-gray-700">{comment.text}</p>
+          <pre className="mt-2 text-gray-700 whitespace-pre-wrap font-sans">{comment.text}</pre>
           <div className="flex items-center mt-3">
             <p className="text-sm text-gray-500">{new Date(comment.timestamp).toLocaleString()}</p>
             <motion.button
@@ -299,30 +299,31 @@ export default function Home() {
                 
                 {replyTo && (
                   <div className="sticky bg-white w-full bottom-0 p-6 border-t rounded-b-lg shadow-lg">
-                    <div className="flex items-center">
-                      <input
-                        type="text"
-                        className="flex-grow p-3 border rounded-l-full focus:outline-none focus:ring-2 focus:ring-[#397698] transition-all duration-200 ease-in-out"
+                    <div className="flex flex-col">
+                      <textarea
+                        className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#397698] transition-all duration-200 ease-in-out min-h-[100px] resize-none mb-3"
                         placeholder="Напишите ответ..."
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
                       />
-                      <button
-                        className="bg-[#397698] hover:bg-[#2c5a75] text-white px-6 py-3 rounded-r-full transition-all duration-200 ease-in-out"
-                        onClick={handleReply}
-                      >
-                        Отправить
-                      </button>
+                      <div className="flex space-x-3">
+                        <button
+                          className="flex-1 bg-[#397698] hover:bg-[#2c5a75] text-white px-6 py-3 rounded-full transition-all duration-200 ease-in-out"
+                          onClick={handleReply}
+                        >
+                          Отправить
+                        </button>
+                        <button
+                          className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-full transition-all duration-200 ease-in-out"
+                          onClick={() => {
+                            setReplyTo(null);
+                            setReplyText('');
+                          }}
+                        >
+                          Отмена
+                        </button>
+                      </div>
                     </div>
-                    <button
-                      className="mt-3 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-full transition-all duration-200 ease-in-out"
-                      onClick={() => {
-                        setReplyTo(null);
-                        setReplyText('');
-                      }}
-                    >
-                      Отмена
-                    </button>
                   </div>
                 )}
               </div>

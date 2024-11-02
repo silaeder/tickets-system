@@ -132,7 +132,7 @@ export default function ShowAnswers() {
           className={`mb-4 p-4 rounded-lg transition-all duration-300 ease-in-out ${isReplying ? 'bg-[#397698]/20 border-l-4 border-[#397698]' : 'bg-white shadow-lg hover:shadow-xl border border-gray-200'}`}
         >
           <p className="font-semibold text-gray-800">{comment.sender}</p>
-          <p className="mt-2 text-gray-700">{comment.text}</p>
+          <p className="mt-2 text-gray-700 whitespace-pre-wrap">{comment.text}</p>
           <div className="flex items-center mt-3">
             <p className="text-sm text-gray-500">{new Date(comment.timestamp).toLocaleString()}</p>
             <motion.button
@@ -297,10 +297,12 @@ export default function ShowAnswers() {
                 {Object.entries(answer.answers).map(([fieldId, value]) => {
                   const field = answer.form.form_description.find(f => f.id === fieldId);
                   return (
-                    <p key={fieldId} className="mb-2">
-                      <strong className="text-[#2D384B]">{field?.label || fieldId}:</strong>{' '}
-                      <span className="text-[#4A5567]">{value.toString()}</span>
-                    </p>
+                    <div key={fieldId} className="mb-4 bg-white rounded-lg p-3 shadow-sm">
+                      <div className="inline-block bg-[#397698] text-white px-3 py-1 rounded-md text-sm mb-2">
+                        {field?.label || fieldId}
+                      </div>
+                      <pre className="text-[#4A5567] whitespace-pre-wrap font-sans">{value.toString()}</pre>
+                    </div>
                   );
                 })}
               </motion.div>
