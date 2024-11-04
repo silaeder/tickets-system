@@ -14,6 +14,7 @@ export default function Register() {
   const [secondName, setSecondName] = useState('');
   const [surname, setSurname] = useState('');
   const [loading, setLoading] = useState(false);
+  const [dataProcessingConsent, setDataProcessingConsent] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -165,6 +166,56 @@ export default function Register() {
               value={surname}
               onChange={(e) => setSurname(e.target.value)}
             />
+          </motion.div>
+          <motion.div 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.85 }}
+            className="mb-8"
+          >
+            <label className="flex items-start cursor-pointer">
+              <div className="relative flex items-center h-5">
+                <input
+                  required
+                  type="checkbox"
+                  checked={dataProcessingConsent}
+                  onChange={(e) => setDataProcessingConsent(e.target.checked)}
+                  className="sr-only"
+                />
+                <div className={`w-5 h-5 border-2 rounded transition-colors duration-200 ${
+                  dataProcessingConsent 
+                    ? 'bg-[#397698] border-[#397698]' 
+                    : 'bg-white border-gray-300'
+                } flex items-center justify-center`}>
+                  {dataProcessingConsent && (
+                    <svg 
+                      className="w-3 h-3 text-white" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth="2" 
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  )}
+                </div>
+              </div>
+              <span className="ml-2 text-sm text-gray-700">
+                Я согласен на{' '}
+                <a 
+                  href="https://docs.google.com/document/d/1p0JU-NzR7xG8mAYKTe723ODUhaUmuS7zp6s5Jt76AdU/edit?tab=t.0" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-[#397698] hover:text-[#2c5a75] underline"
+                >
+                  обработку персональных данных
+                </a>
+              </span>
+            </label>
           </motion.div>
           <motion.div 
             initial={{ y: 20, opacity: 0 }}
