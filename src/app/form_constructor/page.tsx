@@ -287,18 +287,37 @@ export default function FormConstructor() {
                   </select>
 
                   {field.requirementCondition && (
-                    <input
-                      type="text"
-                      placeholder="Значение для обязательности"
-                      value={field.requirementCondition.value}
-                      onChange={(e) => updateField(index, {
-                        requirementCondition: {
-                          dependsOn: field.requirementCondition?.dependsOn || '',
-                          value: e.target.value
-                        }
-                      })}
-                      className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-all duration-200"
-                    />
+                    <>
+                      {fields.find(f => f.id === field.requirementCondition?.dependsOn)?.type === 'checkbox' ? (
+                        <select
+                          value={field.requirementCondition.value}
+                          onChange={(e) => updateField(index, {
+                            requirementCondition: {
+                              dependsOn: field.requirementCondition?.dependsOn || '',
+                              value: e.target.value
+                            }
+                          })}
+                          className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-all duration-200"
+                        >
+                          <option value="">Выберите значение</option>
+                          <option value="true">Да</option>
+                          <option value="false">Нет</option>
+                        </select>
+                      ) : (
+                        <input
+                          type="text"
+                          placeholder="Значение для обязательности"
+                          value={field.requirementCondition.value}
+                          onChange={(e) => updateField(index, {
+                            requirementCondition: {
+                              dependsOn: field.requirementCondition?.dependsOn || '',
+                              value: e.target.value
+                            }
+                          })}
+                          className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-all duration-200"
+                        />
+                      )}
+                    </>
                   )}
                 </div>
 

@@ -36,6 +36,12 @@ type Comment = {
   replies: Comment[] | null;
 };
 
+type Filters = {
+  status: string;
+  fieldId: string;
+  fieldValue: string;
+};
+
 export default function ShowAnswers() {
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +49,12 @@ export default function ShowAnswers() {
   const [replyTo, setReplyTo] = useState<{ answerId: number; indices: number[] } | null>(null);
   const [updatingAnswerId, setUpdatingAnswerId] = useState<number | null>(null);
   const [loadingButtonType, setLoadingButtonType] = useState<string | null>(null);
+  const [filters, setFilters] = useState<Filters>({
+    status: '',
+    fieldId: '',
+    fieldValue: '',
+  });
+  const [availableFields, setAvailableFields] = useState<Array<{id: string, label: string}>>([]);
   const params = useParams();
   const formId = params.formId as string;
 
@@ -51,6 +63,13 @@ export default function ShowAnswers() {
       fetchAnswers();
     }
   }, [formId]);
+
+  useEffect(() => {
+    if (answers.length > 0) {
+      const fields = answers[0].form.form_description;
+      setAvailableFields(fields.map(f => ({ id: f.id, label: f.label })));
+    }
+  }, [answers]);
 
   const fetchAnswers = async () => {
     try {
@@ -66,6 +85,26 @@ export default function ShowAnswers() {
       console.error('Error fetching answers:', error);
       setError('An error occurred while fetching answers');
     }
+  };
+
+  const filterAnswers = (answers: Answer[]) => {
+    return answers.filter(answer => {
+      if (filters.status) {
+        if (filters.status === 'approved' && !answer.status.approved) return false;
+        if (filters.status === 'waiting' && !answer.status.waiting) return false;
+        if (filters.status === 'edits_required' && !answer.status.edits_required) return false;
+        if (filters.status === 'rejected' && (answer.status.approved || answer.status.waiting || answer.status.edits_required)) return false;
+      }
+
+      if (filters.fieldId && filters.fieldValue) {
+        const fieldValue = answer.answers[filters.fieldId]?.toString().toLowerCase();
+        if (!fieldValue || !fieldValue.includes(filters.fieldValue.toLowerCase())) {
+          return false;
+        }
+      }
+
+      return true;
+    });
   };
 
   const updateStatus = async (answerId: number, newStatus: Partial<Answer['status']>, newComment: string, buttonType: string) => {
@@ -171,6 +210,75 @@ export default function ShowAnswers() {
         className="container mx-auto p-6"
       >
         <h1 className="text-4xl font-bold mb-8 text-[#2D384B]">Ответы на форму</h1>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mb-6 bg-white p-6 rounded-lg shadow-lg"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Статус
+              </label>
+              <select
+                value={filters.status}
+                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#397698] focus:border-transparent"
+              >
+                <option value="">Все статусы</option>
+                <option value="approved">Одобрено</option>
+                <option value="waiting">Ожидает проверки</option>
+                <option value="edits_required">Требуются правки</option>
+                <option value="rejected">Отказано</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Поле для фильтрации
+              </label>
+              <select
+                value={filters.fieldId}
+                onChange={(e) => setFilters({ ...filters, fieldId: e.target.value, fieldValue: '' })}
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#397698] focus:border-transparent"
+              >
+                <option value="">Выберите поле</option>
+                {availableFields.map(field => (
+                  <option key={field.id} value={field.id}>
+                    {field.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Значение поля
+              </label>
+              {filters.fieldId && answers[0]?.form.form_description.find(f => f.id === filters.fieldId)?.type === 'checkbox' ? (
+                <select
+                  value={filters.fieldValue}
+                  onChange={(e) => setFilters({ ...filters, fieldValue: e.target.value })}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#397698] focus:border-transparent"
+                >
+                  <option value="">Все значения</option>
+                  <option value="true">Да</option>
+                  <option value="false">Нет</option>
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  value={filters.fieldValue}
+                  onChange={(e) => setFilters({ ...filters, fieldValue: e.target.value })}
+                  placeholder="Введите значение для поиска"
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#397698] focus:border-transparent"
+                />
+              )}
+            </div>
+          </div>
+        </motion.div>
+
         {error && (
           <motion.p
             initial={{ opacity: 0, x: -20 }}
@@ -182,7 +290,7 @@ export default function ShowAnswers() {
           </motion.p>
         )}
         <AnimatePresence>
-          {answers.map((answer) => (
+          {filterAnswers(answers).map((answer) => (
             <motion.div
               key={answer.id}
               initial={{ opacity: 0, y: 20 }}
@@ -301,7 +409,9 @@ export default function ShowAnswers() {
                       <div className="inline-block bg-[#397698] text-white px-3 py-1 rounded-md text-sm mb-2">
                         {field?.label || fieldId}
                       </div>
-                      <pre className="text-[#4A5567] whitespace-pre-wrap font-sans">{value.toString()}</pre>
+                      <pre className="text-[#4A5567] whitespace-pre-wrap font-sans">
+                        {field?.type === 'checkbox' ? (value === 'true' ? 'Да' : 'Нет') : value.toString()}
+                      </pre>
                     </div>
                   );
                 })}

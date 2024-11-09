@@ -53,7 +53,6 @@ export default function EditForm() {
     }
   };
 
-  // Move fetchForm call into checkAdminStatus success case
   const fetchForm = async () => {
     try {
       const response = await fetch(`/api/get_form/${formId}`);
@@ -217,7 +216,7 @@ export default function EditForm() {
                 transition={{ duration: 0.3 }}
                 className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg"
               >
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <input
                     type="text"
                     placeholder="Название поля"
@@ -327,18 +326,37 @@ export default function EditForm() {
                   </select>
 
                   {field.requirementCondition && (
-                    <input
-                      type="text"
-                      placeholder="Значение для обязательности"
-                      value={field.requirementCondition.value}
-                      onChange={(e) => updateField(index, {
-                        requirementCondition: {
-                          dependsOn: field.requirementCondition?.dependsOn || '',
-                          value: e.target.value
-                        }
-                      })}
-                      className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-all duration-200"
-                    />
+                    <>
+                      {fields.find(f => f.id === field.requirementCondition?.dependsOn)?.type === 'checkbox' ? (
+                        <select
+                          value={field.requirementCondition.value}
+                          onChange={(e) => updateField(index, {
+                            requirementCondition: {
+                              dependsOn: field.requirementCondition?.dependsOn || '',
+                              value: e.target.value
+                            }
+                          })}
+                          className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-all duration-200"
+                        >
+                          <option value="">Выберите значение</option>
+                          <option value="true">Да</option>
+                          <option value="false">Нет</option>
+                        </select>
+                      ) : (
+                        <input
+                          type="text"
+                          placeholder="Значение для обязательности"
+                          value={field.requirementCondition.value}
+                          onChange={(e) => updateField(index, {
+                            requirementCondition: {
+                              dependsOn: field.requirementCondition?.dependsOn || '',
+                              value: e.target.value
+                            }
+                          })}
+                          className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-all duration-200"
+                        />
+                      )}
+                    </>
                   )}
                 </div>
 
@@ -371,7 +389,7 @@ export default function EditForm() {
                     Удалить поле
                   </motion.button>
                 </div>
-                </motion.div>
+              </motion.div>
             ))}
           </AnimatePresence>
 
