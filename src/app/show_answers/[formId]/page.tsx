@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Navbar from '../../components/navbar';
 import { motion, AnimatePresence } from 'framer-motion';
+import MDEditor from '@uiw/react-md-editor';
 
 type Answer = {
   id: number;
@@ -171,7 +172,9 @@ export default function ShowAnswers() {
           className={`mb-4 p-4 rounded-lg transition-all duration-300 ease-in-out ${isReplying ? 'bg-[#397698]/20 border-l-4 border-[#397698]' : 'bg-white shadow-lg hover:shadow-xl border border-gray-200'}`}
         >
           <p className="font-semibold text-gray-800">{comment.sender}</p>
-          <p className="mt-2 text-gray-700 whitespace-pre-wrap">{comment.text}</p>
+          <div className="mt-2 text-gray-700 whitespace-pre-wrap" data-color-mode="light">
+            <MDEditor.Markdown source={comment.text} style={{ backgroundColor: 'transparent' }} />
+          </div>
           <div className="flex items-center mt-3">
             <p className="text-sm text-gray-500">{new Date(comment.timestamp).toLocaleString()}</p>
             <motion.button
@@ -312,14 +315,13 @@ export default function ShowAnswers() {
                   {getStatusText(answer.status)}
                 </motion.span>
               </div>
-              <div className="mb-4">
-                <textarea
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-all duration-200 resize-none focus:outline-none"
-                  placeholder={replyTo && replyTo.answerId === answer.id ? "Отвечаете на комментарий..." : "Оставить комментарий..."}
+              <div className="mb-4" data-color-mode="light">
+                <MDEditor
                   value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  rows={3}
-                  disabled={updatingAnswerId !== null}
+                  onChange={(value) => setComment(value || '')}
+                  preview="edit"
+                  height={200}
+                  className="w-full"
                 />
               </div>
               <div className="mb-6 flex flex-wrap gap-5">

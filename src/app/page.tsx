@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Navbar from './components/navbar';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import MDEditor from '@uiw/react-md-editor';
 
 type Form = {
   id: number;
@@ -116,7 +117,9 @@ export default function Home() {
           className={`mb-4 p-4 rounded-lg transition-all duration-300 ease-in-out ${isReplying ? 'bg-[#397698] bg-opacity-10 border-l-4 border-[#397698]' : 'bg-white shadow-lg hover:shadow-xl border border-gray-200'}`}
         >
           <p className="font-semibold text-gray-800">{comment.sender}</p>
-          <pre className="mt-2 text-gray-700 whitespace-pre-wrap font-sans">{comment.text}</pre>
+          <div className="mt-2 text-gray-700 whitespace-pre-wrap" data-color-mode="light">
+            <MDEditor.Markdown source={comment.text} style={{ backgroundColor: 'transparent' }} />
+          </div>
           <div className="flex items-center mt-3">
             <p className="text-sm text-gray-500">{new Date(comment.timestamp).toLocaleString()}</p>
             <motion.button
@@ -299,12 +302,13 @@ export default function Home() {
                 
                 {replyTo && (
                   <div className="sticky bg-white w-full bottom-0 p-6 border-t rounded-b-lg shadow-lg">
-                    <div className="flex flex-col">
-                      <textarea
-                        className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#397698] transition-all duration-200 ease-in-out min-h-[100px] resize-none mb-3"
-                        placeholder="Напишите ответ..."
+                    <div className="flex flex-col" data-color-mode="light">
+                      <MDEditor
                         value={replyText}
-                        onChange={(e) => setReplyText(e.target.value)}
+                        onChange={(value) => setReplyText(value || '')}
+                        preview="edit"
+                        height={200}
+                        className="mb-3"
                       />
                       <div className="flex space-x-3">
                         <button
