@@ -11,6 +11,7 @@ type Answer = {
   user: {
     name: string;
     surname: string;
+    second_name: string;
   };
   answers: Record<string, any>;
   form: {
@@ -50,6 +51,7 @@ export default function ShowAnswers() {
   const [replyTo, setReplyTo] = useState<{ answerId: number; indices: number[] } | null>(null);
   const [updatingAnswerId, setUpdatingAnswerId] = useState<number | null>(null);
   const [loadingButtonType, setLoadingButtonType] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     status: '',
     fieldId: '',
@@ -85,6 +87,32 @@ export default function ShowAnswers() {
     } catch (error) {
       console.error('Error fetching answers:', error);
       setError('An error occurred while fetching answers');
+    }
+  };
+
+  const exportToExcel = async () => {
+    setIsExporting(true);
+    try {
+      const response = await fetch(`/api/export_answers/${formId}`);
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `form_answers_${formId}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Failed to export answers');
+      }
+    } catch (error) {
+      console.error('Error exporting answers:', error);
+      setError('An error occurred while exporting answers');
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -212,7 +240,31 @@ export default function ShowAnswers() {
         transition={{ duration: 0.5 }}
         className="container mx-auto p-6"
       >
-        <h1 className="text-4xl font-bold mb-8 text-[#2D384B]">Ответы на форму</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold text-[#2D384B]">Ответы на форму</h1>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="bg-[#397698] text-white px-6 py-3 rounded-lg shadow-lg hover:bg-[#2c5a73] transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50"
+            onClick={exportToExcel}
+            disabled={isExporting || answers.length === 0}
+          >
+            {isExporting ? (
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+              />
+            ) : (
+              <>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Экспорт в Excel</span>
+              </>
+            )}
+          </motion.button>
+        </div>
 
         <motion.div
           initial={{ opacity: 0 }}
@@ -304,7 +356,7 @@ export default function ShowAnswers() {
             >
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-semibold text-[#2D384B]">
-                  {answer.user.name} {answer.user.surname}
+                  {answer.user.surname} {answer.user.name} {answer.user.second_name}
                 </h2>
                 <motion.span
                   initial={{ scale: 0.9 }}

@@ -32,7 +32,7 @@ export async function GET(request: Request, { params }: { params: { formId: stri
       where: { formId: parseInt(formId) },
       include: {
         user: {
-          select: { name: true, surname: true },
+          select: { name: true, surname: true, second_name: true },
         },
         status: true,
         form: {
