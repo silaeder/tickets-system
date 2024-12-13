@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   try {
     const userForms = await prisma.form.findMany({
       where: { userId: parseInt(userId) },
-      select: { id: true, name: true },
+      select: { id: true, name: true, closed: true },
     });
 
     return NextResponse.json(userForms);

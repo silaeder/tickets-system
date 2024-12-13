@@ -62,5 +62,7 @@ model Form {
   name String
   form_description Json
 
+  closed Boolean @default(false)
+
   answers Answer[]
 }

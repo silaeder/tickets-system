@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Navbar from '../../components/navbar';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 type Field = {
   id: string;
@@ -16,6 +18,12 @@ type Field = {
     dependsOn: string;
     value: string;
   };
+};
+
+type FormDataType = {
+  name: string;
+  fields: Field[];
+  closed: boolean;
 };
 
 export default function FormRenderer() {
@@ -35,9 +43,23 @@ export default function FormRenderer() {
     try {
       const response = await fetch(`/api/get_form/${params.id}`);
       if (response.ok) {
-        const data = await response.json();
+        const data: FormDataType = await response.json();
         setFormName(data.name);
         setFields(data.fields);
+        
+        if (data.closed) {
+          router.push('/');
+          toast.error('Эта форма больше не принимает ответы', {
+            position: "bottom-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          });
+        }
       }
     } catch (error) {
       console.error('Error fetching form:', error);
@@ -101,6 +123,7 @@ export default function FormRenderer() {
       exit={{ opacity: 0 }}
     >
       <Navbar />
+      <ToastContainer />
       <div className="container mx-auto px-4 py-12">
         <motion.h1 
           className="text-4xl font-bold mb-8 text-center text-gray-800 shadow-text"

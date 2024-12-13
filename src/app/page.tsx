@@ -9,6 +9,7 @@ import MDEditor from '@uiw/react-md-editor';
 type Form = {
   id: number;
   name: string;
+  closed?: boolean;
 };
 
 type Comment = {
@@ -21,7 +22,7 @@ type Comment = {
 type CompletedForm = {
   id: number;
   formId: number;
-  form: { name: string };
+  form: { name: string; closed?: boolean };
   status: {
     approved: boolean;
     waiting: boolean;
@@ -191,15 +192,30 @@ export default function Home() {
                     className="bg-white rounded-lg p-6 shadow-lg transition-all duration-200 ease-in-out"
                   >
                     <h2 className="text-2xl font-semibold mb-4 text-gray-800">{form.name}</h2>
-                    <motion.div
+                    {form.closed ? (
+                      <div className="w-full flex">
+                        <Link 
+                          href="#"
+                          className="inline-block bg-gray-400 cursor-not-allowed text-white px-6 py-3 rounded-full transition-all duration-200 ease-in-out text-center w-full"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          Форма закрыта
+                        </Link>
+                      </div>
+                    ) : (
+                      <motion.div
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         className="w-full flex"
-                    >
-                      <Link href={`/form_renderer/${form.id}`} className="inline-block bg-[#397698] text-white px-6 py-3 rounded-full hover:bg-[#2c5a75] transition-all duration-200 ease-in-out text-center w-full">
-                        Заполнить форму
-                      </Link>
-                    </motion.div>
+                      >
+                        <Link 
+                          href={`/form_renderer/${form.id}`}
+                          className="inline-block bg-[#397698] hover:bg-[#2c5a75] text-white px-6 py-3 rounded-full transition-all duration-200 ease-in-out text-center w-full"
+                        >
+                          Заполнить форму
+                        </Link>
+                      </motion.div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -250,18 +266,30 @@ export default function Home() {
                           Редактировать ответы
                         </Link>
                       </motion.div>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="w-full flex"
-                      >
-                        <Link 
-                          href={`/form_renderer/${form.formId}`}
-                          className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-full text-center transition-all duration-200 ease-in-out"
+                      {form.form.closed ? (
+                        <div className="w-full flex">
+                          <Link 
+                            href="#"
+                            className="w-full bg-gray-400 cursor-not-allowed text-white font-medium py-2 px-4 rounded-full text-center transition-all duration-200 ease-in-out"
+                            onClick={(e) => e.preventDefault()}
+                          >
+                            Форма закрыта
+                          </Link>
+                        </div>
+                      ) : (
+                        <motion.div
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="w-full flex"
                         >
-                          Отправить еще одну заявку
-                        </Link>
-                      </motion.div>
+                          <Link 
+                            href={`/form_renderer/${form.formId}`}
+                            className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-full text-center transition-all duration-200 ease-in-out"
+                          >
+                            Отправить еще одну заявку
+                          </Link>
+                        </motion.div>
+                      )}
                     </div>
                   </div>
                 ))}

@@ -9,13 +9,13 @@ export async function GET(request: Request) {
 
   try {
     const allForms = await prisma.form.findMany({
-      select: { id: true, name: true },
+      select: { id: true, name: true, closed: true },
     });
 
     const userAnswers = await prisma.answer.findMany({
       where: { userId: parseInt(userId) },
       include: {
-        form: { select: { name: true } },
+        form: { select: { name: true, closed: true } },
         status: true,
       },
     });

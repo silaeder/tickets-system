@@ -4,15 +4,19 @@ import { useEffect, useState } from 'react';
 import Navbar from '../components/navbar';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 type Form = {
   id: number;
   name: string;
+  closed: boolean;
 };
 
 export default function MyForms() {
   const [forms, setForms] = useState<Form[]>([]);
   const [loading, setLoading] = useState(true);
+  const [togglingForm, setTogglingForm] = useState<number | null>(null);
 
   useEffect(() => {
     fetchForms();
@@ -27,11 +31,35 @@ export default function MyForms() {
         setForms(data);
       } else {
         console.error('Failed to fetch forms');
+        toast.error('Не удалось загрузить формы');
       }
     } catch (error) {
       console.error('Error fetching forms:', error);
+      toast.error('Ошибка при загрузке форм');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const toggleFormStatus = async (formId: number, currentStatus: boolean) => {
+    setTogglingForm(formId);
+    try {
+      const response = await fetch(`/api/toggle_form_status/${formId}`);
+      
+      if (response.ok) {
+        // Optimistically update the form status
+        setForms(forms.map(form => 
+          form.id === formId ? { ...form, closed: !currentStatus } : form
+        ));
+        toast.success(`Форма ${currentStatus ? 'открыта' : 'закрыта'}`);
+      } else {
+        toast.error('Не удалось изменить статус формы');
+      }
+    } catch (error) {
+      console.error('Error toggling form status:', error);
+      toast.error('Ошибка при изменении статуса формы');
+    } finally {
+      setTogglingForm(null);
     }
   };
 
@@ -60,6 +88,7 @@ export default function MyForms() {
       className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200"
     >
       <Navbar />
+      <ToastContainer position="bottom-right" />
       <main className="container mx-auto px-4 py-6">
         <AnimatePresence>
           <motion.section
@@ -85,13 +114,36 @@ export default function MyForms() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {forms.map((form) => (
-                  <motion.div
+                  <div
                     key={form.id}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                    className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-colors duration-200 ease-in-out"
+                    className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow duration-200 ease-in-out"
                   >
-                    <h2 className="text-2xl font-semibold mb-4 text-gray-800">{form.name}</h2>
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-2xl font-semibold text-gray-800">{form.name}</h2>
+                      <motion.button
+                        whileHover={{ scale: togglingForm === form.id ? 1 : 1.05 }}
+                        whileTap={{ scale: togglingForm === form.id ? 1 : 0.95 }}
+                        onClick={() => toggleFormStatus(form.id, form.closed)}
+                        disabled={togglingForm === form.id}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-color duration-200 ${
+                          form.closed 
+                            ? 'bg-red-100 text-red-700 hover:bg-red-200' 
+                            : 'bg-green-100 text-green-700 hover:bg-green-200'
+                        } ${togglingForm === form.id ? 'opacity-70 cursor-not-allowed' : ''}`}
+                      >
+                        {togglingForm === form.id ? (
+                          <span className="flex items-center">
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Обновление...
+                          </span>
+                        ) : (
+                          form.closed ? 'Открыть форму' : 'Закрыть форму'
+                        )}
+                      </motion.button>
+                    </div>
                     <div className="flex flex-col space-y-3">
                       <Link href={`/form_renderer/${form.id}`} className="text-[#397698] hover:text-[#2c5a75] font-medium transition-colors duration-300 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -114,7 +166,7 @@ export default function MyForms() {
                         Редактировать форму
                       </Link>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             )}
