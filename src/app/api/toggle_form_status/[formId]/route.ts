@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import prisma from '../../../db/db';
 
 export async function GET(
-  request: Request,
-  { params }: { params: { formId: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ formId: string }> }
 ) {
   const userId = request.headers.get('X-User-ID');
 
@@ -12,7 +12,8 @@ export async function GET(
   }
 
   try {
-    const formId = parseInt(params.formId);
+    const { formId: formIdParam } = await params;
+    const formId = parseInt(formIdParam);
 
     if (isNaN(formId)) {
       return NextResponse.json({ error: 'Invalid form ID' }, { status: 400 });
