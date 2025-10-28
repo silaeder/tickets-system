@@ -8,8 +8,8 @@ type Comment = {
   replies: Comment[];
 };
 
-export async function POST(request: Request, { params }: { params: { formId: string } }) {
-  const { formId } = params;
+export async function POST(request: Request, { params }: { params: Promise<{ formId: string }> }) {
+  const { formId } = await params;
   const userId = request.headers.get('X-User-ID');
   const { replyTo, replyText } = await request.json();
 

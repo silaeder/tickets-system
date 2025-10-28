@@ -10,8 +10,8 @@ interface Comment {
   replies: Comment[];
 }
 
-export async function GET(request: Request, { params }: { params: { formId: string } }) {
-  const { formId } = params;
+export async function GET(request: Request, { params }: { params: Promise<{ formId: string }> }) {
+  const { formId } = await params;
   const userId = request.headers.get('X-User-ID');
 
   if (!userId) {
@@ -63,8 +63,8 @@ function isCommentArray(arr: any): arr is Comment[] {
   return Array.isArray(arr) && arr.every(isComment);
 }
 
-export async function PATCH(request: Request, { params }: { params: { formId: string } }) {
-  const { formId } = params;
+export async function PATCH(request: Request, { params }: { params: Promise<{ formId: string }> }) {
+  const { formId } = await params;
   const userId = request.headers.get('X-User-ID');
   const { answerId, status, comment, replyTo } = await request.json();
 

@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../../db/db';
 
-export async function PUT(request: Request, { params }: { params: { formId: string } }) {
-  const { formId } = params;
+export async function PUT(request: Request, { params }: { params: Promise<{ formId: string }> }) {
+  const { formId } = await params;
   const { name, fields } = await request.json();
   const userId = request.headers.get('X-User-ID');
 

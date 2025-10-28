@@ -4,13 +4,15 @@ import ExcelJS from 'exceljs';
 
 export async function GET(
   request: Request,
-  { params }: { params: { formId: string } }
+  { params }: { params: Promise<{ formId: string }> }
 ) {
   try {
     // Получаем ответы на форму из базы данных
+    const { formId } = await params;
+    const numericFormId = Number.parseInt(formId, 10);
     const answers = await prisma.answer.findMany({
       where: {
-        formId: parseInt(params.formId)
+        formId: numericFormId
       },
       include: {
         user: {
@@ -98,7 +100,7 @@ export async function GET(
     return new NextResponse(buffer, {
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition': `attachment; filename=form_${params.formId}_answers.xlsx`
+        'Content-Disposition': `attachment; filename=form_${numericFormId}_answers.xlsx`
       }
     });
 

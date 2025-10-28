@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../../db/db';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
-  const { id } = params;
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
 
   try {
+    const numericId = Number.parseInt(id, 10);
     const form = await prisma.form.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: numericId },
       select: { form_description: true, name: true, closed: true },
     });
 

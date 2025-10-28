@@ -4,7 +4,8 @@ import prisma from '../../db/db';
 import { cookies } from 'next/headers';
 
 export async function GET(request: Request) {
-    const token = cookies().get('token')?.value;
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
 
   if (!token) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
