@@ -8,7 +8,7 @@
 
 # Deploy
 - На сервер устанавливаем nvm
-- Пишем `nvm install --lts`
+- Пишем `nvm install --lts; nvm use --lts`
 - Далее `npm i -g pnpm` `pnpm i`
 - Заполняем .env
 - `pnpm run build`
