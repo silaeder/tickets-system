@@ -11,6 +11,7 @@
 - Пишем `nvm install --lts; nvm use --lts`
 - Далее `npm i -g pnpm` `pnpm i`
 - Заполняем .env
+- `pnpx prisma db push; pnpx prisma generate`
 - `pnpm run build`
 - `pnpx next start --port PORT` Желательно запустить это в screen
 - Готово
