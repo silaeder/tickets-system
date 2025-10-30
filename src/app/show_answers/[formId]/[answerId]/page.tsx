@@ -305,7 +305,7 @@ export default function AnswerDetails() {
             {/* Comment input */}
             <div className="mb-6" data-color-mode="light">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Добавить комментарий {comment.trim() && <span className="text-green-600">(готов к отправке)</span>}
+                Комментарий
               </label>
               <MDEditor
                 value={comment}
