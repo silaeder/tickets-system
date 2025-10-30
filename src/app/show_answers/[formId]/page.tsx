@@ -283,7 +283,10 @@ export default function ShowAnswers() {
                   </label>
                   <select
                     value={filters.status}
-                    onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                    onChange={(e) => {
+                      setFilters({ ...filters, status: e.target.value });
+                      setCurrentPage(1);
+                    }}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-colors"
                   >
                     <option value="">Все статусы</option>
@@ -300,7 +303,10 @@ export default function ShowAnswers() {
                   </label>
                   <select
                     value={filters.fieldId}
-                    onChange={(e) => setFilters({ ...filters, fieldId: e.target.value, fieldValue: '' })}
+                    onChange={(e) => {
+                      setFilters({ ...filters, fieldId: e.target.value, fieldValue: '' });
+                      setCurrentPage(1);
+                    }}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-colors"
                   >
                     <option value="">Выберите поле</option>
@@ -319,7 +325,10 @@ export default function ShowAnswers() {
                   {filters.fieldId && answers[0]?.form.form_description.find(f => f.id === filters.fieldId)?.type === 'checkbox' ? (
                     <select
                       value={filters.fieldValue}
-                      onChange={(e) => setFilters({ ...filters, fieldValue: e.target.value })}
+                      onChange={(e) => {
+                        setFilters({ ...filters, fieldValue: e.target.value });
+                        setCurrentPage(1);
+                      }}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-colors"
                     >
                       <option value="">Все значения</option>
@@ -330,7 +339,10 @@ export default function ShowAnswers() {
                     <input
                       type="text"
                       value={filters.fieldValue}
-                      onChange={(e) => setFilters({ ...filters, fieldValue: e.target.value })}
+                      onChange={(e) => {
+                        setFilters({ ...filters, fieldValue: e.target.value });
+                        setCurrentPage(1);
+                      }}
                       placeholder="Введите значение для поиска"
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-colors"
                       disabled={!filters.fieldId}
