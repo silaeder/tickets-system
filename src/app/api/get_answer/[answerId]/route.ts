@@ -13,10 +13,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ answ
     const answer = await prisma.answer.findUnique({
       where: { id: parseInt(answerId) },
       include: {
+        user: {
+          select: { name: true, surname: true, second_name: true },
+        },
+        status: true,
         form: {
           select: {
             name: true,
             form_description: true,
+            userId: true,
           },
         },
       },
@@ -26,7 +31,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ answ
       return NextResponse.json({ error: 'Answer not found' }, { status: 404 });
     }
 
-    if (answer.userId !== parseInt(userId)) {
+    // Allow access if user is the answer owner OR the form owner
+    if (answer.userId !== parseInt(userId) && answer.form.userId !== parseInt(userId)) {
       return NextResponse.json({ error: 'Unauthorized access' }, { status: 403 });
     }
 

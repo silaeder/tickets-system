@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Navbar from '../../components/navbar';
 import { motion, AnimatePresence } from 'framer-motion';
-import MDEditor from '@uiw/react-md-editor';
 
 type Answer = {
   id: number;
@@ -47,10 +46,6 @@ type Filters = {
 export default function ShowAnswers() {
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [comment, setComment] = useState<string>('');
-  const [replyTo, setReplyTo] = useState<{ answerId: number; indices: number[] } | null>(null);
-  const [updatingAnswerId, setUpdatingAnswerId] = useState<number | null>(null);
-  const [loadingButtonType, setLoadingButtonType] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     status: '',
@@ -58,7 +53,11 @@ export default function ShowAnswers() {
     fieldValue: '',
   });
   const [availableFields, setAvailableFields] = useState<Array<{id: string, label: string}>>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const itemsPerPage = 12;
   const params = useParams();
+  const router = useRouter();
   const formId = params.formId as string;
 
   useEffect(() => {
@@ -69,8 +68,16 @@ export default function ShowAnswers() {
 
   useEffect(() => {
     if (answers.length > 0) {
-      const fields = answers[0].form.form_description;
-      setAvailableFields(fields.map(f => ({ id: f.id, label: f.label })));
+      // Add user fields first, then form fields
+      const userFields = [
+        { id: 'user.name', label: 'Имя' },
+        { id: 'user.surname', label: 'Фамилия' },
+        { id: 'user.second_name', label: 'Отчество' },
+      ];
+      
+      const formFields = answers[0].form.form_description.map(f => ({ id: f.id, label: f.label }));
+      
+      setAvailableFields([...userFields, ...formFields]);
     }
   }, [answers]);
 
@@ -118,6 +125,7 @@ export default function ShowAnswers() {
 
   const filterAnswers = (answers: Answer[]) => {
     return answers.filter(answer => {
+      // Status filter
       if (filters.status) {
         if (filters.status === 'approved' && !answer.status.approved) return false;
         if (filters.status === 'waiting' && !answer.status.waiting) return false;
@@ -125,9 +133,23 @@ export default function ShowAnswers() {
         if (filters.status === 'rejected' && (answer.status.approved || answer.status.waiting || answer.status.edits_required)) return false;
       }
 
+      // Field filter (user fields + form fields)
       if (filters.fieldId && filters.fieldValue) {
-        const fieldValue = answer.answers[filters.fieldId]?.toString().toLowerCase();
-        if (!fieldValue || !fieldValue.includes(filters.fieldValue.toLowerCase())) {
+        let fieldValue = '';
+        
+        // Handle user fields
+        if (filters.fieldId === 'user.name') {
+          fieldValue = answer.user.name.toLowerCase();
+        } else if (filters.fieldId === 'user.surname') {
+          fieldValue = answer.user.surname.toLowerCase();
+        } else if (filters.fieldId === 'user.second_name') {
+          fieldValue = answer.user.second_name.toLowerCase();
+        } else {
+          // Handle form fields
+          fieldValue = answer.answers[filters.fieldId]?.toString().toLowerCase() || '';
+        }
+        
+        if (!fieldValue.includes(filters.fieldValue.toLowerCase())) {
           return false;
         }
       }
@@ -136,39 +158,28 @@ export default function ShowAnswers() {
     });
   };
 
-  const updateStatus = async (answerId: number, newStatus: Partial<Answer['status']>, newComment: string, buttonType: string) => {
-    setUpdatingAnswerId(answerId);
-    setLoadingButtonType(buttonType);
-    try {
-      const response = await fetch(`/api/get_form_answers/${formId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          answerId,
-          status: newStatus,
-          comment: newComment,
-          replyTo: replyTo,
-        }),
-      });
+  const filteredAnswers = filterAnswers(answers);
+  const totalPages = Math.ceil(filteredAnswers.length / itemsPerPage);
+  const paginatedAnswers = filteredAnswers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
-      if (response.ok) {
-        fetchAnswers();
-        setComment('');
-        setReplyTo(null);
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || 'Failed to update status');
-      }
-    } catch (error) {
-      console.error('Error updating status:', error);
-      setError('An error occurred while updating status');
-    } finally {
-      setUpdatingAnswerId(null);
-      setLoadingButtonType(null);
-    }
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const clearFilters = () => {
+    setFilters({
+      status: '',
+      fieldId: '',
+      fieldValue: '',
+    });
+    setCurrentPage(1);
+  };
+
+
 
   const getStatusText = (status: Answer['status']) => {
     if (status.approved) return 'Одобрено';
@@ -184,307 +195,309 @@ export default function ShowAnswers() {
     return 'bg-red-200 text-red-800';
   };
 
-  const renderComments = (comments: Comment[] | null, answerId: number, indices: number[] = []) => {
-    if (!comments) return null;
-    return comments.map((comment, index) => {
-      const currentIndices = [...indices, index];
-      const isReplying = JSON.stringify(currentIndices) === JSON.stringify(replyTo?.indices) && answerId === replyTo?.answerId;
-      
-      return (
-        <motion.div
-          key={index}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: 20 }}
-          transition={{ duration: 0.3 }}
-          className={`mb-4 p-4 rounded-lg transition-all duration-300 ease-in-out ${isReplying ? 'bg-[#397698]/20 border-l-4 border-[#397698]' : 'bg-white shadow-lg hover:shadow-xl border border-gray-200'}`}
-        >
-          <p className="font-semibold text-gray-800">{comment.sender}</p>
-          <div className="mt-2 text-gray-700 whitespace-pre-wrap" data-color-mode="light">
-            <MDEditor.Markdown source={comment.text} style={{ backgroundColor: 'transparent' }} />
-          </div>
-          <div className="flex items-center mt-3">
-            <p className="text-sm text-gray-500">{new Date(comment.timestamp).toLocaleString()}</p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={`ml-4 px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none ${isReplying ? 'bg-[#397698] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-              onClick={() => setReplyTo(isReplying ? null : { answerId, indices: currentIndices })}
-              disabled={updatingAnswerId !== null}
-            >
-              {isReplying ? 'Отменить ответ' : 'Ответить'}
-            </motion.button>
-          </div>
-          {comment.replies && comment.replies.length > 0 && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="ml-6 mt-4 border-l-2 border-gray-300 pl-4"
-            >
-              {renderComments(comment.replies, answerId, currentIndices)}
-            </motion.div>
-          )}
-        </motion.div>
-      );
-    });
-  };
+
 
   return (
     <div className="min-h-screen bg-[#F5F7F9]">
       <Navbar />
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="container mx-auto p-6"
-      >
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-[#2D384B]">Ответы на форму</h1>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-[#397698] text-white px-6 py-3 rounded-lg shadow-lg hover:bg-[#2c5a73] transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50"
-            onClick={exportToExcel}
-            disabled={isExporting || answers.length === 0}
-          >
-            {isExporting ? (
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-              />
-            ) : (
-              <>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                <span>Экспорт в Excel</span>
-              </>
-            )}
-          </motion.button>
-        </div>
-
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mb-6 bg-white p-6 rounded-lg shadow-lg"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8"
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Статус
-              </label>
-              <select
-                value={filters.status}
-                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#397698] focus:border-transparent"
-              >
-                <option value="">Все статусы</option>
-                <option value="approved">Одобрено</option>
-                <option value="waiting">Ожидает проверки</option>
-                <option value="edits_required">Требуются правки</option>
-                <option value="rejected">Отказано</option>
-              </select>
+              <h1 className="text-3xl lg:text-4xl font-bold text-[#2D384B] mb-2">Ответы на форму</h1>
+              <p className="text-gray-600">
+                Показано {paginatedAnswers.length} из {filteredAnswers.length} ответов
+              </p>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Поле для фильтрации
-              </label>
-              <select
-                value={filters.fieldId}
-                onChange={(e) => setFilters({ ...filters, fieldId: e.target.value, fieldValue: '' })}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#397698] focus:border-transparent"
+            
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="lg:hidden flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
               >
-                <option value="">Выберите поле</option>
-                {availableFields.map(field => (
-                  <option key={field.id} value={field.id}>
-                    {field.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Значение поля
-              </label>
-              {filters.fieldId && answers[0]?.form.form_description.find(f => f.id === filters.fieldId)?.type === 'checkbox' ? (
-                <select
-                  value={filters.fieldValue}
-                  onChange={(e) => setFilters({ ...filters, fieldValue: e.target.value })}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#397698] focus:border-transparent"
-                >
-                  <option value="">Все значения</option>
-                  <option value="true">Да</option>
-                  <option value="false">Нет</option>
-                </select>
-              ) : (
-                <input
-                  type="text"
-                  value={filters.fieldValue}
-                  onChange={(e) => setFilters({ ...filters, fieldValue: e.target.value })}
-                  placeholder="Введите значение для поиска"
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#397698] focus:border-transparent"
-                />
-              )}
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                <span>Фильтры</span>
+              </button>
+              
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-[#397698] text-white px-4 lg:px-6 py-2 lg:py-3 rounded-lg shadow-lg hover:bg-[#2c5a73] transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50"
+                onClick={exportToExcel}
+                disabled={isExporting || answers.length === 0}
+              >
+                {isExporting ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                  />
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    <span className="hidden sm:inline">Экспорт в Excel</span>
+                  </>
+                )}
+              </motion.button>
             </div>
           </div>
         </motion.div>
 
-        {error && (
-          <motion.p
+        <div className="flex gap-8">
+          {/* Sidebar */}
+          <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3 }}
-            className="text-red-500 mb-6 p-4 bg-red-100 rounded-lg shadow"
+            className={`${
+              sidebarOpen ? 'block' : 'hidden'
+            } lg:block w-full lg:w-80 flex-shrink-0`}
           >
-            {error}
-          </motion.p>
-        )}
-        <AnimatePresence>
-          {filterAnswers(answers).map((answer) => (
-            <motion.div
-              key={answer.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="bg-white rounded-lg p-6 shadow-lg mb-8 hover:shadow-xl"
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-semibold text-[#2D384B]">
-                  {answer.user.surname} {answer.user.name} {answer.user.second_name}
-                </h2>
-                <motion.span
-                  initial={{ scale: 0.9 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.1 }}
-                  className={`${getStatusColor(answer.status)} px-4 py-2 rounded-full text-sm font-medium`}
+            <div className="bg-white rounded-lg shadow-lg p-6 sticky top-8">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-[#2D384B]">Фильтры</h2>
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  className="lg:hidden p-1 rounded-md hover:bg-gray-100"
                 >
-                  {getStatusText(answer.status)}
-                </motion.span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
-              <div className="mb-4" data-color-mode="light">
-                <MDEditor
-                  value={comment}
-                  onChange={(value) => setComment(value || '')}
-                  preview="edit"
-                  height={200}
-                  className="w-full"
-                />
+              
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Статус
+                  </label>
+                  <select
+                    value={filters.status}
+                    onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-colors"
+                  >
+                    <option value="">Все статусы</option>
+                    <option value="approved">Одобрено</option>
+                    <option value="waiting">Ожидает проверки</option>
+                    <option value="edits_required">Требуются правки</option>
+                    <option value="rejected">Отказано</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Поле для фильтрации
+                  </label>
+                  <select
+                    value={filters.fieldId}
+                    onChange={(e) => setFilters({ ...filters, fieldId: e.target.value, fieldValue: '' })}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-colors"
+                  >
+                    <option value="">Выберите поле</option>
+                    {availableFields.map(field => (
+                      <option key={field.id} value={field.id}>
+                        {field.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Значение поля
+                  </label>
+                  {filters.fieldId && answers[0]?.form.form_description.find(f => f.id === filters.fieldId)?.type === 'checkbox' ? (
+                    <select
+                      value={filters.fieldValue}
+                      onChange={(e) => setFilters({ ...filters, fieldValue: e.target.value })}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-colors"
+                    >
+                      <option value="">Все значения</option>
+                      <option value="true">Да</option>
+                      <option value="false">Нет</option>
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={filters.fieldValue}
+                      onChange={(e) => setFilters({ ...filters, fieldValue: e.target.value })}
+                      placeholder="Введите значение для поиска"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-colors"
+                      disabled={!filters.fieldId}
+                    />
+                  )}
+                </div>
+
+                <button
+                  onClick={clearFilters}
+                  className="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg transition-colors duration-200 font-medium"
+                >
+                  Очистить фильтры
+                </button>
               </div>
-              <div className="mb-6 flex flex-wrap gap-5">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ duration: 0.1 }}
-                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow relative focus:outline-none"
-                  onClick={() => updateStatus(answer.id, { approved: true, waiting: false, edits_required: false }, comment, 'approve')}
-                  disabled={updatingAnswerId !== null}
+            </div>
+          </motion.div>
+
+          {/* Main content */}
+          <div className="flex-1 min-w-0">
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6"
+              >
+                {error}
+              </motion.div>
+            )}
+
+            {/* Cards Grid */}
+            <AnimatePresence mode="wait">
+              {filteredAnswers.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="text-center"
                 >
-                  {updatingAnswerId === answer.id && loadingButtonType === 'approve' ? (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mx-auto"
-                    />
-                  ) : (
-                    'Одобрить'
-                  )}
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ duration: 0.1 }}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow relative focus:outline-none"
-                  onClick={() => updateStatus(answer.id, { approved: false, waiting: true, edits_required: false }, comment, 'waiting')}
-                  disabled={updatingAnswerId !== null}
+                  <div className="bg-white rounded-lg shadow-lg p-12">
+                    <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 className="text-xl font-semibold text-gray-600 mb-2">Ответы не найдены</h3>
+                    <p className="text-gray-500">Попробуйте изменить фильтры поиска</p>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 mb-8"
                 >
-                  {updatingAnswerId === answer.id && loadingButtonType === 'waiting' ? (
+                  {paginatedAnswers.map((answer, index) => (
                     <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mx-auto"
-                    />
-                  ) : (
-                    'Ожидает проверки'
-                  )}
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ duration: 0.1 }}
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow relative focus:outline-none"
-                  onClick={() => updateStatus(answer.id, { approved: false, waiting: false, edits_required: true }, comment, 'edits')}
-                  disabled={updatingAnswerId !== null}
-                >
-                  {updatingAnswerId === answer.id && loadingButtonType === 'edits' ? (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mx-auto"
-                    />
-                  ) : (
-                    'Требуются правки'
-                  )}
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ duration: 0.1 }}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex-grow relative focus:outline-none"
-                  onClick={() => updateStatus(answer.id, { approved: false, waiting: false, edits_required: false }, comment, 'reject')}
-                  disabled={updatingAnswerId !== null}
-                >
-                  {updatingAnswerId === answer.id && loadingButtonType === 'reject' ? (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mx-auto"
-                    />
-                  ) : (
-                    'Отказать'
-                  )}
-                </motion.button>
-              </div>
+                      key={answer.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
+                      className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl cursor-pointer transform hover:scale-105 transition-shadow duration-200 border border-gray-100"
+                      onClick={() => router.push(`/show_answers/${formId}/${answer.id}`)}
+                    >
+                      <div className="mb-4">
+                        <h3 className="text-lg font-semibold text-[#2D384B] mb-2 line-clamp-2">
+                          {answer.user.surname} {answer.user.name} {answer.user.second_name}
+                        </h3>
+                        <motion.span
+                          initial={{ scale: 0.9 }}
+                          animate={{ scale: 1 }}
+                          transition={{ duration: 0.1 }}
+                          className={`${getStatusColor(answer.status)} px-3 py-1 rounded-full text-xs font-medium inline-block`}
+                        >
+                          {getStatusText(answer.status)}
+                        </motion.span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
+                        <span className="font-medium">ID: {answer.id}</span>
+                        {answer.status.comments && answer.status.comments.length > 0 && (
+                          <div className="flex items-center bg-blue-50 px-2 py-1 rounded-full">
+                            <svg className="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            <span className="text-blue-600 font-medium">{answer.status.comments.length}</span>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.3, delay: 0.2 }}
-                className="bg-[#F5F7F9] p-4 rounded-lg shadow-inner"
+                className="flex justify-center items-center space-x-2 mt-8"
               >
-                {Object.entries(answer.answers).map(([fieldId, value]) => {
-                  const field = answer.form.form_description.find(f => f.id === fieldId);
-                  return (
-                    <div key={fieldId} className="mb-4 bg-white rounded-lg p-3 shadow-sm">
-                      <div className="inline-block bg-[#397698] text-white px-3 py-1 rounded-md text-sm mb-2">
-                        {field?.label || fieldId}
-                      </div>
-                      <pre className="text-[#4A5567] whitespace-pre-wrap font-sans">
-                        {field?.type === 'checkbox' ? (value === 'true' ? 'Да' : 'Нет') : value.toString()}
-                      </pre>
-                    </div>
-                  );
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-3 py-2 rounded-lg bg-white shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                  if (
+                    page === 1 ||
+                    page === totalPages ||
+                    (page >= currentPage - 2 && page <= currentPage + 2)
+                  ) {
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`px-4 py-2 rounded-lg transition-all duration-200 font-medium ${
+                          currentPage === page
+                            ? 'bg-[#397698] text-white shadow-lg'
+                            : 'bg-white shadow-md hover:shadow-lg hover:bg-gray-50'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  } else if (
+                    page === currentPage - 3 ||
+                    page === currentPage + 3
+                  ) {
+                    return (
+                      <span key={page} className="px-2 py-2 text-gray-400">
+                        ...
+                      </span>
+                    );
+                  }
+                  return null;
                 })}
+
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-2 rounded-lg bg-white shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
               </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.3 }}
-                className="mt-6"
-              >
-                <h3 className="font-semibold text-xl mb-3 text-[#2D384B]">Комментарии:</h3>
-                <AnimatePresence>
-                  {renderComments(answer.status.comments, answer.id)}
-                </AnimatePresence>
-              </motion.div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </motion.div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
     </div>
   );
 }
