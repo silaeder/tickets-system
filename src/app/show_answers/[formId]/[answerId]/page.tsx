@@ -228,7 +228,6 @@ export default function AnswerDetails() {
               <h1 className="text-2xl lg:text-4xl font-bold text-[#2D384B]">
                 {answer.user.surname} {answer.user.name} {answer.user.second_name}
               </h1>
-              <p className="text-gray-600 mt-1">ID ответа: {answer.id}</p>
             </div>
           </div>
           
