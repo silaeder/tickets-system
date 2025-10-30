@@ -256,7 +256,7 @@ export default function AnswerDetails() {
               </svg>
               Ответы на форму
             </h2>
-            <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+            <div className="space-y-4 overflow-y-auto pr-2">
               {Object.entries(answer.answers).map(([fieldId, value]) => {
                 const field = answer.form.form_description.find(f => f.id === fieldId);
                 return (

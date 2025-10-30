@@ -52,7 +52,7 @@ export default function ShowAnswers() {
     fieldId: '',
     fieldValue: '',
   });
-  const [availableFields, setAvailableFields] = useState<Array<{id: string, label: string}>>([]);
+  const [availableFields, setAvailableFields] = useState<Array<{ id: string, label: string }>>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const itemsPerPage = 12;
@@ -74,9 +74,9 @@ export default function ShowAnswers() {
         { id: 'user.surname', label: 'Фамилия' },
         { id: 'user.second_name', label: 'Отчество' },
       ];
-      
+
       const formFields = answers[0].form.form_description.map(f => ({ id: f.id, label: f.label }));
-      
+
       setAvailableFields([...userFields, ...formFields]);
     }
   }, [answers]);
@@ -136,7 +136,7 @@ export default function ShowAnswers() {
       // Field filter (user fields + form fields)
       if (filters.fieldId && filters.fieldValue) {
         let fieldValue = '';
-        
+
         // Handle user fields
         if (filters.fieldId === 'user.name') {
           fieldValue = answer.user.name.toLowerCase();
@@ -148,7 +148,7 @@ export default function ShowAnswers() {
           // Handle form fields
           fieldValue = answer.answers[filters.fieldId]?.toString().toLowerCase() || '';
         }
-        
+
         if (!fieldValue.includes(filters.fieldValue.toLowerCase())) {
           return false;
         }
@@ -200,7 +200,7 @@ export default function ShowAnswers() {
   return (
     <div className="min-h-screen bg-[#F5F7F9]">
       <Navbar />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <motion.div
@@ -216,7 +216,7 @@ export default function ShowAnswers() {
                 Показано {paginatedAnswers.length} из {filteredAnswers.length} ответов
               </p>
             </div>
-            
+
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -227,7 +227,7 @@ export default function ShowAnswers() {
                 </svg>
                 <span>Фильтры</span>
               </button>
-              
+
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -260,11 +260,10 @@ export default function ShowAnswers() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3 }}
-            className={`${
-              sidebarOpen ? 'block' : 'hidden'
-            } lg:block w-full lg:w-80 flex-shrink-0`}
+            className={`${sidebarOpen ? 'block' : 'hidden'
+              } lg:block w-full lg:w-80 flex-shrink-0`}
           >
-            <div className="bg-white rounded-lg shadow-lg p-6 sticky top-8">
+            <div className="bg-white rounded-lg shadow-lg p-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-[#2D384B]">Фильтры</h2>
                 <button
@@ -276,7 +275,7 @@ export default function ShowAnswers() {
                   </svg>
                 </button>
               </div>
-              
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -384,7 +383,7 @@ export default function ShowAnswers() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 mb-8"
+                  className="grid grid-cols-3 gap-6 mb-8"
                 >
                   {paginatedAnswers.map((answer, index) => (
                     <motion.div
@@ -393,11 +392,11 @@ export default function ShowAnswers() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.3, delay: index * 0.05 }}
-                      className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl cursor-pointer transform hover:scale-105 transition-shadow duration-200 border border-gray-100"
+                      className="relative bg-white rounded-lg p-6 shadow-lg hover:shadow-xl cursor-pointer transform hover:scale-105 transition-shadow duration-200 border border-gray-100"
                       onClick={() => router.push(`/show_answers/${formId}/${answer.id}`)}
                     >
-                      <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-[#2D384B] mb-2 line-clamp-2">
+                      <div>
+                        <h3 className="text-lg font-semibold text-[#2D384B] mb-3 line-clamp-2">
                           {answer.user.surname} {answer.user.name} {answer.user.second_name}
                         </h3>
                         <motion.span
@@ -409,18 +408,16 @@ export default function ShowAnswers() {
                           {getStatusText(answer.status)}
                         </motion.span>
                       </div>
-                      
-                      <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
-                        <span className="font-medium">ID: {answer.id}</span>
-                        {answer.status.comments && answer.status.comments.length > 0 && (
-                          <div className="flex items-center bg-blue-50 px-2 py-1 rounded-full">
-                            <svg className="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                            </svg>
-                            <span className="text-blue-600 font-medium">{answer.status.comments.length}</span>
-                          </div>
-                        )}
-                      </div>
+
+                      {/* Comments badge overlapping bottom right */}
+                      {answer.status.comments && answer.status.comments.length > 0 && (
+                        <div className="absolute bottom-2 right-2 flex items-center bg-blue-50 text-blue-700 border-blue-300 px-2 py-1 rounded-full">
+                          <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                          </svg>
+                          <span className="text-xs font-medium">{answer.status.comments.length}</span>
+                        </div>
+                      )}
                     </motion.div>
                   ))}
                 </motion.div>
@@ -454,11 +451,10 @@ export default function ShowAnswers() {
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
-                        className={`px-4 py-2 rounded-lg transition-all duration-200 font-medium ${
-                          currentPage === page
-                            ? 'bg-[#397698] text-white shadow-lg'
-                            : 'bg-white shadow-md hover:shadow-lg hover:bg-gray-50'
-                        }`}
+                        className={`px-4 py-2 rounded-lg transition-all duration-200 font-medium ${currentPage === page
+                          ? 'bg-[#397698] text-white shadow-lg'
+                          : 'bg-white shadow-md hover:shadow-lg hover:bg-gray-50'
+                          }`}
                       >
                         {page}
                       </button>
@@ -493,7 +489,7 @@ export default function ShowAnswers() {
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
