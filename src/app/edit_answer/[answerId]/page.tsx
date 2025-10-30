@@ -229,7 +229,7 @@ export default function EditAnswer() {
             <motion.button
               type="submit"
               disabled={saving}
-              className="bg-[#397698] text-white px-8 py-3 rounded-full hover:bg-[#2c5a75] transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#397698] focus:ring-opacity-50 shadow-lg flex items-center justify-center gap-2"
+              className="bg-[#397698] text-white px-8 py-3 rounded-full hover:bg-[#2c5a75] transition-color transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#397698] focus:ring-opacity-50 shadow-lg flex items-center justify-center gap-2"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
