@@ -1,15 +1,31 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../../db/db';
 import ExcelJS from 'exceljs';
+import { verifyToken } from '../../../utils/jwt';
+import { cookies } from 'next/headers';
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ formId: string }> }
 ) {
+  // Use X-User-ID header
+  const userId = request.headers.get('X-User-ID');
+  if (!userId) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+  const { formId } = await params;
+  const numericFormId = Number.parseInt(formId, 10);
+  // Fetch the form and check ownership
+  const form = await prisma.form.findUnique({
+    where: { id: numericFormId },
+    select: { userId: true },
+  });
+  if (!form || form.userId !== parseInt(userId)) {
+    return NextResponse.json({ error: 'Only form owner can export answers' }, { status: 403 });
+  }
+
   try {
     // Получаем ответы на форму из базы данных
-    const { formId } = await params;
-    const numericFormId = Number.parseInt(formId, 10);
     const answers = await prisma.answer.findMany({
       where: {
         formId: numericFormId
