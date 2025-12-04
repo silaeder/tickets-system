@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '../../components/navbar';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 
 type Answer = {
   id: number;
@@ -55,9 +56,10 @@ export default function ShowAnswers() {
   const [availableFields, setAvailableFields] = useState<Array<{ id: string, label: string }>>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const itemsPerPage = 12;
+  const itemsPerPage = 24;
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const formId = params.formId as string;
 
   useEffect(() => {
@@ -65,6 +67,23 @@ export default function ShowAnswers() {
       fetchAnswers();
     }
   }, [formId]);
+
+  // Restore state from URL on mount
+  useEffect(() => {
+    const page = searchParams.get('page');
+    const status = searchParams.get('status');
+    const fieldId = searchParams.get('fieldId');
+    const fieldValue = searchParams.get('fieldValue');
+
+    if (page) setCurrentPage(parseInt(page));
+    if (status || fieldId || fieldValue) {
+      setFilters({
+        status: status || '',
+        fieldId: fieldId || '',
+        fieldValue: fieldValue || '',
+      });
+    }
+  }, []);
 
   useEffect(() => {
     if (answers.length > 0) {
@@ -165,18 +184,35 @@ export default function ShowAnswers() {
     currentPage * itemsPerPage
   );
 
+  const updateURL = (newPage?: number, newFilters?: Filters) => {
+    const params = new URLSearchParams();
+    const page = newPage ?? currentPage;
+    const filterState = newFilters ?? filters;
+
+    if (page > 1) params.set('page', page.toString());
+    if (filterState.status) params.set('status', filterState.status);
+    if (filterState.fieldId) params.set('fieldId', filterState.fieldId);
+    if (filterState.fieldValue) params.set('fieldValue', filterState.fieldValue);
+
+    const queryString = params.toString();
+    router.replace(`/show_answers/${formId}${queryString ? `?${queryString}` : ''}`, { scroll: false });
+  };
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    updateURL(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const clearFilters = () => {
-    setFilters({
+    const newFilters = {
       status: '',
       fieldId: '',
       fieldValue: '',
-    });
+    };
+    setFilters(newFilters);
     setCurrentPage(1);
+    updateURL(1, newFilters);
   };
 
 
@@ -284,8 +320,10 @@ export default function ShowAnswers() {
                   <select
                     value={filters.status}
                     onChange={(e) => {
-                      setFilters({ ...filters, status: e.target.value });
+                      const newFilters = { ...filters, status: e.target.value };
+                      setFilters(newFilters);
                       setCurrentPage(1);
+                      updateURL(1, newFilters);
                     }}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-colors"
                   >
@@ -304,8 +342,10 @@ export default function ShowAnswers() {
                   <select
                     value={filters.fieldId}
                     onChange={(e) => {
-                      setFilters({ ...filters, fieldId: e.target.value, fieldValue: '' });
+                      const newFilters = { ...filters, fieldId: e.target.value, fieldValue: '' };
+                      setFilters(newFilters);
                       setCurrentPage(1);
+                      updateURL(1, newFilters);
                     }}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-colors"
                   >
@@ -326,8 +366,10 @@ export default function ShowAnswers() {
                     <select
                       value={filters.fieldValue}
                       onChange={(e) => {
-                        setFilters({ ...filters, fieldValue: e.target.value });
+                        const newFilters = { ...filters, fieldValue: e.target.value };
+                        setFilters(newFilters);
                         setCurrentPage(1);
+                        updateURL(1, newFilters);
                       }}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-colors"
                     >
@@ -340,8 +382,10 @@ export default function ShowAnswers() {
                       type="text"
                       value={filters.fieldValue}
                       onChange={(e) => {
-                        setFilters({ ...filters, fieldValue: e.target.value });
+                        const newFilters = { ...filters, fieldValue: e.target.value };
+                        setFilters(newFilters);
                         setCurrentPage(1);
+                        updateURL(1, newFilters);
                       }}
                       placeholder="Введите значение для поиска"
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#397698] focus:border-transparent transition-colors"
@@ -395,43 +439,53 @@ export default function ShowAnswers() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="grid grid-cols-3 gap-6 mb-8"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8"
                 >
-                  {paginatedAnswers.map((answer, index) => (
-                    <motion.div
-                      key={answer.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3, delay: index * 0.05 }}
-                      className="relative bg-white rounded-lg p-6 shadow-lg hover:shadow-xl cursor-pointer transform hover:scale-105 transition-shadow duration-200 border border-gray-100"
-                      onClick={() => router.push(`/show_answers/${formId}/${answer.id}`)}
-                    >
-                      <div>
-                        <h3 className="text-lg font-semibold text-[#2D384B] mb-3 line-clamp-2">
-                          {answer.user.surname} {answer.user.name} {answer.user.second_name}
-                        </h3>
-                        <motion.span
-                          initial={{ scale: 0.9 }}
-                          animate={{ scale: 1 }}
-                          transition={{ duration: 0.1 }}
-                          className={`${getStatusColor(answer.status)} px-3 py-1 rounded-full text-xs font-medium inline-block`}
-                        >
-                          {getStatusText(answer.status)}
-                        </motion.span>
-                      </div>
+                  {paginatedAnswers.map((answer, index) => {
+                    const params = new URLSearchParams();
+                    if (currentPage > 1) params.set('page', currentPage.toString());
+                    if (filters.status) params.set('status', filters.status);
+                    if (filters.fieldId) params.set('fieldId', filters.fieldId);
+                    if (filters.fieldValue) params.set('fieldValue', filters.fieldValue);
+                    const queryString = params.toString();
+                    const href = `/show_answers/${formId}/${answer.id}${queryString ? `?${queryString}` : ''}`;
 
-                      {/* Comments badge overlapping bottom right */}
-                      {answer.status.comments && answer.status.comments.length > 0 && (
-                        <div className="absolute bottom-2 right-2 flex items-center bg-blue-50 text-blue-700 border-blue-300 px-2 py-1 rounded-full">
-                          <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                          </svg>
-                          <span className="text-xs font-medium">{answer.status.comments.length}</span>
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
+                    return (
+                      <Link key={answer.id} href={href}>
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.3, delay: index * 0.05 }}
+                          className="relative bg-white rounded-lg p-6 shadow-lg hover:shadow-xl cursor-pointer transform hover:scale-105 transition-shadow duration-200 border border-gray-100 h-full"
+                        >
+                          <div>
+                            <h3 className="text-lg font-semibold text-[#2D384B] mb-3 line-clamp-2">
+                              {answer.user.surname} {answer.user.name} {answer.user.second_name}
+                            </h3>
+                            <motion.span
+                              initial={{ scale: 0.9 }}
+                              animate={{ scale: 1 }}
+                              transition={{ duration: 0.1 }}
+                              className={`${getStatusColor(answer.status)} px-3 py-1 rounded-full text-xs font-medium inline-block`}
+                            >
+                              {getStatusText(answer.status)}
+                            </motion.span>
+                          </div>
+
+                          {/* Comments badge overlapping bottom right */}
+                          {answer.status.comments && answer.status.comments.length > 0 && (
+                            <div className="absolute bottom-2 right-2 flex items-center bg-blue-50 text-blue-700 border-blue-300 px-2 py-1 rounded-full">
+                              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                              </svg>
+                              <span className="text-xs font-medium">{answer.status.comments.length}</span>
+                            </div>
+                          )}
+                        </motion.div>
+                      </Link>
+                    );
+                  })}
                 </motion.div>
               )}
             </AnimatePresence>

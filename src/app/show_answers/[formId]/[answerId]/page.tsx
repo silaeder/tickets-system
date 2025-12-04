@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '../../../components/navbar';
 import { motion, AnimatePresence } from 'framer-motion';
 import MDEditor from '@uiw/react-md-editor';
@@ -49,6 +49,7 @@ export default function AnswerDetails() {
   
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const formId = params.formId as string;
   const answerId = params.answerId as string;
 
@@ -217,7 +218,21 @@ export default function AnswerDetails() {
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => router.back()}
+              onClick={() => {
+                const params = new URLSearchParams();
+                const page = searchParams.get('page');
+                const status = searchParams.get('status');
+                const fieldId = searchParams.get('fieldId');
+                const fieldValue = searchParams.get('fieldValue');
+                
+                if (page) params.set('page', page);
+                if (status) params.set('status', status);
+                if (fieldId) params.set('fieldId', fieldId);
+                if (fieldValue) params.set('fieldValue', fieldValue);
+                
+                const queryString = params.toString();
+                router.push(`/show_answers/${formId}${queryString ? `?${queryString}` : ''}`);
+              }}
               className="p-2 rounded-lg bg-white shadow-md hover:shadow-lg transition-all duration-200"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
