@@ -20,8 +20,8 @@ export async function GET(request: Request) {
       },
     });
 
-    const completedFormIds = new Set(userAnswers.map(answer => answer.formId));
-    const availableForms = allForms.filter(form => !completedFormIds.has(form.id));
+    const completedFormIds = new Set(userAnswers.map((answer: typeof userAnswers[0]) => answer.formId));
+    const availableForms = allForms.filter((form: typeof allForms[0]) => !completedFormIds.has(form.id));
 
     return NextResponse.json({ availableForms, completedForms: userAnswers });
   } catch (error) {
