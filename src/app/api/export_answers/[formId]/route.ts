@@ -86,7 +86,7 @@ export async function GET(
     });
 
     // Добавляем строки с данными
-    answers.forEach(answer => {
+    answers.forEach((answer: typeof answers[0]) => {
       const status = answer.status?.approved ? 'Одобрено' : 
                     answer.status?.waiting ? 'Ожидает проверки' :
                     answer.status?.edits_required ? 'Требуются правки' : 
