@@ -36,6 +36,7 @@ export async function GET(
             name: true,
             surname: true,
             second_name: true,
+            email: true,
           }
         },
         form: {
@@ -67,6 +68,7 @@ export async function GET(
       'Имя',
       'Фамилия', 
       'Отчество',
+      'Email',
       'Статус',
       ...formDescription.map(f => f.label)
     ];
@@ -97,6 +99,7 @@ export async function GET(
         answer.user?.name || '',
         answer.user?.surname || '',
         answer.user?.second_name || '',
+        answer.user?.email || '',
         status
       ];
 
